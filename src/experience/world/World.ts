@@ -1,24 +1,20 @@
 import Experience from "../Experience";
-import LightSpot from "./LightSpot";
-import VaderHologram from "./VaderHologram";
+import Scene from "./Scene";
 
 class World {
   private readonly experience = Experience.getInstance();
   private readonly resources = this.experience.resources;
 
-  vaderHologram?: VaderHologram;
-  lightSpot?: LightSpot;
+  scene?: Scene;
 
   constructor() {
     this.resources.on("loadEnd", () => {
-      this.vaderHologram = new VaderHologram();
-      // this.lightSpot = new LightSpot();
+      this.scene = new Scene();
     });
   }
 
   update() {
-    this.vaderHologram?.update();
-    // this.lightSpot?.update();
+    this.scene?.update();
   }
 }
 

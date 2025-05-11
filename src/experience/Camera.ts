@@ -18,7 +18,7 @@ class Camera {
       0.1,
       100
     );
-    this.instance.position.set(1, 1, 2);
+    this.instance.position.set(2, 2, 4);
 
     this.controls = new OrbitControls(this.instance, this.canvas);
     this.controls.enableDamping = true;

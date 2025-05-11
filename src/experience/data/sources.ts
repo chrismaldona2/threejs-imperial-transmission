@@ -7,9 +7,14 @@ export type Source = GLTFSource | TextureSource;
 
 export const sources: Source[] = [
   {
-    name: "darth_vader_model",
+    name: "scene_model",
     type: "gltf",
-    path: "./models/darth_vader.glb",
+    path: "./models/scene_model.glb",
+  },
+  {
+    name: "scene_texture",
+    type: "texture",
+    path: "./textures/baked.png",
   },
   {
     name: "noise_texture",
