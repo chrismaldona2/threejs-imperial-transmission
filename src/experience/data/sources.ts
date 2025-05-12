@@ -21,4 +21,14 @@ export const sources: Source[] = [
     type: "texture",
     path: "./textures/noise.png",
   },
+  {
+    name: "gold_matcap",
+    type: "texture",
+    path: "./textures/gold_matcap_2.jpg",
+  },
+  {
+    name: "screen_matcap",
+    type: "texture",
+    path: "./textures/black_screen_matcap_5.jpg",
+  },
 ];

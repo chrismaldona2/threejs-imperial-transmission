@@ -9,63 +9,77 @@ class Scene {
   private readonly resources = this.experience.resources;
   private readonly gui = this.experience.debug.instance;
 
-  private vaderMesh!: THREE.Mesh;
-  private lightMesh!: THREE.Mesh;
-  private lightSourceMesh!: THREE.Mesh;
-  private holoprojectorMesh!: THREE.Mesh;
+  private model: THREE.Object3D;
+  private darthVader: THREE.Mesh;
+  private light: THREE.Mesh;
+  private lightSource: THREE.Mesh;
+  private holoprojector: THREE.Mesh;
+  private holoprojectorGold: THREE.Mesh;
+  private holoprojectorScreen: THREE.Mesh;
 
   private vaderHologramEffect: HologramEffect;
   private lightSpotEffect: LightSpotEffect;
 
   constructor() {
     const gltf = this.resources.getAsset<GLTF>("scene_model");
-    const texture = this.resources.getAsset<THREE.Texture>("scene_texture");
-    texture.flipY = false;
+    const bakeTexture = this.resources.getAsset<THREE.Texture>("scene_texture");
 
-    const model = gltf.scene;
-    model.position.y -= 0.5;
+    const goldMatcap = this.resources.getAsset<THREE.Texture>("gold_matcap");
+    const screenMatcap =
+      this.resources.getAsset<THREE.Texture>("screen_matcap");
 
-    const darth_vader = model.getObjectByName("darth_vader");
-    const light = model.getObjectByName("hologram_light");
-    const lightSource = model.getObjectByName("hologram_light_source");
-    const holoprojector = model.getObjectByName("holoprojector_chamber");
+    bakeTexture.flipY = false;
+    this.model = gltf.scene;
+    this.model.position.y -= 0.5;
+
+    this.darthVader = this.getMesh("darth_vader");
+    this.light = this.getMesh("hologram_light");
+    this.lightSource = this.getMesh("hologram_light_source");
+    this.holoprojector = this.getMesh("holoprojector_chamber");
+    this.holoprojectorGold = this.getMesh("hologram_chamber_proyector_gold");
+    this.holoprojectorScreen = this.getMesh("holoprojector_controls");
 
     this.vaderHologramEffect = new HologramEffect();
     this.lightSpotEffect = new LightSpotEffect();
 
-    if (darth_vader instanceof THREE.Mesh) {
-      this.vaderMesh = darth_vader;
-      this.vaderMesh.material = this.vaderHologramEffect.material;
-    }
+    this.darthVader.material = this.vaderHologramEffect.material;
+    this.light.material = this.lightSpotEffect.material;
+    this.lightSource.material = new THREE.MeshBasicMaterial({
+      color: 0xe0eeff,
+    });
+    this.holoprojector.material = new THREE.MeshBasicMaterial({
+      map: bakeTexture,
+    });
+    this.holoprojectorGold.material = new THREE.MeshMatcapMaterial({
+      matcap: goldMatcap,
+    });
+    this.holoprojectorScreen.material = new THREE.MeshMatcapMaterial({
+      matcap: screenMatcap,
+    });
 
-    if (light instanceof THREE.Mesh) {
-      this.lightMesh = light;
-      this.lightMesh.material = this.lightSpotEffect.material;
-    }
-
-    if (lightSource instanceof THREE.Mesh) {
-      this.lightSourceMesh = lightSource;
-      lightSource.material = new THREE.MeshBasicMaterial({ color: 0xe0eeff });
-    }
-
-    if (holoprojector instanceof THREE.Mesh) {
-      this.holoprojectorMesh = holoprojector;
-      holoprojector.material = new THREE.MeshBasicMaterial({ map: texture });
-    }
-
-    this.experience.scene.add(model);
+    this.experience.scene.add(this.model);
     this.setupTweaks();
   }
 
-  setupTweaks() {
-    if (this.lightSourceMesh.material instanceof THREE.MeshBasicMaterial) {
+  private getMesh(name: string): THREE.Mesh {
+    const mesh = this.model.getObjectByName(name);
+
+    if (!mesh || !(mesh instanceof THREE.Mesh)) {
+      throw new Error(`Couldn’t find mesh named "${name}"`);
+    }
+
+    return mesh;
+  }
+
+  private setupTweaks() {
+    if (this.lightSource.material instanceof THREE.MeshBasicMaterial) {
       const debugObj = {
-        lightSourceColor: this.lightSourceMesh.material.color.getHex(),
+        lightSourceColor: this.lightSource.material.color.getHex(),
       };
 
       this.gui.addColor(debugObj, "lightSourceColor").onChange(() => {
-        if (this.lightSourceMesh.material instanceof THREE.MeshBasicMaterial)
-          this.lightSourceMesh.material.color.set(debugObj.lightSourceColor);
+        if (this.lightSource.material instanceof THREE.MeshBasicMaterial)
+          this.lightSource.material.color.set(debugObj.lightSourceColor);
       });
     }
   }
