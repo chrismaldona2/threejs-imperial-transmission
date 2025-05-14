@@ -39,8 +39,6 @@ class LightSpotEffect {
       },
       transparent: true,
     });
-
-    this.setupTweaks();
   }
 
   setupTweaks() {

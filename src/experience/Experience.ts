@@ -38,9 +38,9 @@ class Experience {
   }
 
   update() {
+    this.world.update();
     this.camera.update();
     this.renderer.update();
-    this.world.update();
   }
 
   resize() {
@@ -49,6 +49,7 @@ class Experience {
   }
 
   dispose() {
+    this.world.dispose();
     this.timer.dispose();
     this.canvas.destroy();
     this.camera.dispose();

@@ -1,20 +1,24 @@
 import Experience from "../Experience";
-import Scene from "./Scene";
+import Ship from "./Ship";
 
 class World {
   private readonly experience = Experience.getInstance();
   private readonly resources = this.experience.resources;
 
-  scene?: Scene;
+  ship?: Ship;
 
   constructor() {
     this.resources.on("loadEnd", () => {
-      this.scene = new Scene();
+      this.ship = new Ship();
     });
   }
 
   update() {
-    this.scene?.update();
+    this.ship?.update();
+  }
+
+  dispose() {
+    this.ship?.dispose();
   }
 }
 
