@@ -2,12 +2,12 @@ import Experience from "../Experience";
 import * as THREE from "three";
 import vertexShader from "../../shaders/lightspot/vertex.glsl";
 import fragmentShader from "../../shaders/lightspot/fragment.glsl";
+import type GUI from "lil-gui";
 
 class LightSpotEffect {
   private readonly experience = Experience.getInstance();
   private readonly resources = this.experience.resources;
   private readonly timer = this.experience.timer;
-  private readonly gui = this.experience.debug.instance;
 
   material: THREE.ShaderMaterial;
 
@@ -41,60 +41,60 @@ class LightSpotEffect {
     });
   }
 
-  setupTweaks() {
+  setupTweaks(gui: GUI) {
     const debugObj = {
       colorTop: this.material.uniforms.uColorTop.value.getHex(),
       colorBottom: this.material.uniforms.uColorBottom.value.getHex(),
     };
 
-    this.gui
+    gui
       .add(this.material.uniforms.uNoiseAlphaScale, "value")
       .min(0)
       .max(2)
       .step(0.001)
       .name("alphaScale");
-    this.gui
+    gui
       .add(this.material.uniforms.uSpeed, "value")
       .min(0)
       .max(0.5)
       .step(0.001)
       .name("Speed");
-    this.gui
+    gui
       .add(this.material.uniforms.uMaxIntensity, "value")
       .min(0)
       .max(5)
       .step(0.001)
       .name("maxIntensity");
-    this.gui
+    gui
       .add(this.material.uniforms.uFalloffScale, "value")
       .min(0)
       .max(5)
       .step(0.001)
       .name("falloffScale");
-    this.gui
+    gui
       .add(this.material.uniforms.uFalloffOffset, "value")
       .min(0)
       .max(5)
       .step(0.001)
       .name("falloffOffset");
-    this.gui
+    gui
       .add(this.material.uniforms.uBaseAlpha, "value")
       .min(0)
       .max(1)
       .step(0.001)
       .name("baseAlpha");
-    this.gui
+    gui
       .add(this.material.uniforms.uColorOffset, "value")
       .min(0)
       .max(1)
       .step(0.001)
       .name("colorOffset");
-    this.gui
+    gui
       .addColor(debugObj, "colorTop")
       .onChange(() =>
         this.material.uniforms.uColorTop.value.set(debugObj.colorTop)
       );
-    this.gui
+    gui
       .addColor(debugObj, "colorBottom")
       .onChange(() =>
         this.material.uniforms.uColorBottom.value.set(debugObj.colorBottom)

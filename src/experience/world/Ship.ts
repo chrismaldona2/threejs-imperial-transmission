@@ -7,6 +7,8 @@ import LightSpotEffect from "./LightSpotEffect";
 class Ship {
   private readonly experience = Experience.getInstance();
   private readonly resources = this.experience.resources;
+  private readonly gui = this.experience.debug.instance;
+
   private model: THREE.Object3D;
   private vaderHologramEffect?: HologramEffect;
   private lightSpotEffect?: LightSpotEffect;
@@ -16,7 +18,12 @@ class Ship {
     this.model = gltf.scene;
     this.model.position.y -= 0.5;
     this.setupMaterials();
+
+    /* MOUNT */
     this.experience.scene.add(this.model);
+
+    /* TWEAKS */
+    this.setupTweaks();
   }
 
   private setupMaterials() {
@@ -26,8 +33,8 @@ class Ship {
     const screenMatcap =
       this.resources.getAsset<THREE.Texture>("screen_matcap");
 
-    bakedTexture.colorSpace = THREE.SRGBColorSpace;
     bakedTexture.flipY = false;
+    bakedTexture.colorSpace = THREE.SRGBColorSpace;
     goldMatcap.colorSpace = THREE.SRGBColorSpace;
     screenMatcap.colorSpace = THREE.SRGBColorSpace;
 
@@ -63,6 +70,10 @@ class Ship {
       throw new Error(`Couldn’t find mesh named "${name}"`);
     }
     return mesh;
+  }
+
+  private setupTweaks() {
+    this.lightSpotEffect?.setupTweaks(this.gui.addFolder("LightSpot"));
   }
 
   update() {

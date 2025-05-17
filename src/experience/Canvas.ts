@@ -5,10 +5,7 @@ class Canvas {
     this.domElement = document.createElement("canvas");
     this.domElement.id = "webgl_canvas";
 
-    this.mount();
-  }
-
-  mount() {
+    /* MOUNT */
     document.body.appendChild(this.domElement);
   }
 
