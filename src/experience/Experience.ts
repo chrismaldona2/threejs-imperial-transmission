@@ -54,6 +54,7 @@ class Experience {
     this.canvas.destroy();
     this.camera.dispose();
     this.renderer.dispose();
+    this.debug.dispose();
   }
 
   static getInstance(): Experience {

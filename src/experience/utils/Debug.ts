@@ -6,6 +6,10 @@ class Debug {
   constructor() {
     this.instance = new GUI({ title: "Tweaks" });
   }
+
+  dispose() {
+    this.instance.destroy();
+  }
 }
 
 export default Debug;
