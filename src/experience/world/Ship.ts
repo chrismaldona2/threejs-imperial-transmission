@@ -23,44 +23,58 @@ class Ship {
     this.experience.scene.add(this.model);
 
     /* TWEAKS */
-    this.setupTweaks();
+    // this.setupTweaks();
   }
+
+  // private setupMaterials() {
+  //   const bakedTexture =
+  //     this.resources.getAsset<THREE.Texture>("baked_texture");
+  //   const goldMatcap = this.resources.getAsset<THREE.Texture>("gold_matcap");
+  //   const screenMatcap =
+  //     this.resources.getAsset<THREE.Texture>("screen_matcap");
+
+  //   bakedTexture.flipY = false;
+  //   bakedTexture.colorSpace = THREE.SRGBColorSpace;
+  //   goldMatcap.colorSpace = THREE.SRGBColorSpace;
+  //   screenMatcap.colorSpace = THREE.SRGBColorSpace;
+
+  //   const darthVader = this.getMesh("darth_vader");
+  //   const light = this.getMesh("hologram_light");
+  //   const lightSource = this.getMesh("hologram_light_source");
+  //   const holoprojector = this.getMesh("holoprojector_chamber");
+  //   const holoprojectorGold = this.getMesh("hologram_chamber_proyector_gold");
+  //   const holoprojectorScreen = this.getMesh("holoprojector_controls");
+
+  //   this.vaderHologramEffect = new HologramEffect();
+  //   this.lightSpotEffect = new LightSpotEffect();
+
+  //   darthVader.material = this.vaderHologramEffect.material;
+  //   light.material = this.lightSpotEffect.material;
+  //   lightSource.material = new THREE.MeshBasicMaterial({
+  //     color: 0xe0eeff,
+  //   });
+  //   holoprojector.material = new THREE.MeshBasicMaterial({
+  //     map: bakedTexture,
+  //   });
+  //   holoprojectorGold.material = new THREE.MeshMatcapMaterial({
+  //     matcap: goldMatcap,
+  //   });
+  //   holoprojectorScreen.material = new THREE.MeshMatcapMaterial({
+  //     matcap: screenMatcap,
+  //   });
+  // }
 
   private setupMaterials() {
     const bakedTexture =
       this.resources.getAsset<THREE.Texture>("baked_texture");
-    const goldMatcap = this.resources.getAsset<THREE.Texture>("gold_matcap");
-    const screenMatcap =
-      this.resources.getAsset<THREE.Texture>("screen_matcap");
 
     bakedTexture.flipY = false;
     bakedTexture.colorSpace = THREE.SRGBColorSpace;
-    goldMatcap.colorSpace = THREE.SRGBColorSpace;
-    screenMatcap.colorSpace = THREE.SRGBColorSpace;
 
-    const darthVader = this.getMesh("darth_vader");
-    const light = this.getMesh("hologram_light");
-    const lightSource = this.getMesh("hologram_light_source");
-    const holoprojector = this.getMesh("holoprojector_chamber");
-    const holoprojectorGold = this.getMesh("hologram_chamber_proyector_gold");
-    const holoprojectorScreen = this.getMesh("holoprojector_controls");
+    const material = new THREE.MeshBasicMaterial({ map: bakedTexture });
 
-    this.vaderHologramEffect = new HologramEffect();
-    this.lightSpotEffect = new LightSpotEffect();
-
-    darthVader.material = this.vaderHologramEffect.material;
-    light.material = this.lightSpotEffect.material;
-    lightSource.material = new THREE.MeshBasicMaterial({
-      color: 0xe0eeff,
-    });
-    holoprojector.material = new THREE.MeshBasicMaterial({
-      map: bakedTexture,
-    });
-    holoprojectorGold.material = new THREE.MeshMatcapMaterial({
-      matcap: goldMatcap,
-    });
-    holoprojectorScreen.material = new THREE.MeshMatcapMaterial({
-      matcap: screenMatcap,
+    this.model.traverse((child) => {
+      if (child instanceof THREE.Mesh) child.material = material;
     });
   }
 

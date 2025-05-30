@@ -9,12 +9,12 @@ export const sources: Source[] = [
   {
     name: "scene_model",
     type: "gltf",
-    path: "./models/scene_model.glb",
+    path: "./models/scene.glb",
   },
   {
     name: "baked_texture",
     type: "texture",
-    path: "./textures/baked.png",
+    path: "./textures/baked_2.png",
   },
   {
     name: "noise_texture",
