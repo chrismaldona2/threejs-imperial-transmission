@@ -65,21 +65,35 @@ class Ship {
   // }
 
   private setupMaterials() {
-    const bakedTexture =
-      this.resources.getAsset<THREE.Texture>("baked_texture");
+    const textures = {
+      part1: this.resources.getAsset<THREE.Texture>("baked_texture_p1"),
+      part2: this.resources.getAsset<THREE.Texture>("baked_texture_p2"),
+    };
 
-    bakedTexture.flipY = false;
-    bakedTexture.colorSpace = THREE.SRGBColorSpace;
+    textures.part1.flipY = false;
+    textures.part1.colorSpace = THREE.SRGBColorSpace;
+    textures.part2.flipY = false;
+    textures.part2.colorSpace = THREE.SRGBColorSpace;
 
-    const material = new THREE.MeshBasicMaterial({ map: bakedTexture });
+    const materials = {
+      part1: new THREE.MeshBasicMaterial({ map: textures.part1 }),
+      part2: new THREE.MeshBasicMaterial({ map: textures.part2 }),
+    };
 
-    this.model.traverse((child) => {
-      if (child instanceof THREE.Mesh) child.material = material;
-    });
+    const meshes = {
+      part1: this.getMesh("part_1"),
+      part2: this.getMesh("part_2"),
+    };
+
+    meshes.part1.material = materials.part1;
+    meshes.part2.material = materials.part2;
   }
 
-  private getMesh(name: string): THREE.Mesh {
-    const mesh = this.model.getObjectByName(name);
+  private getMesh(
+    name: string,
+    context: THREE.Object3D = this.model
+  ): THREE.Mesh {
+    const mesh = context.getObjectByName(name);
     if (!mesh || !(mesh instanceof THREE.Mesh)) {
       throw new Error(`Couldn’t find mesh named "${name}"`);
     }

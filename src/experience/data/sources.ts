@@ -12,9 +12,14 @@ export const sources: Source[] = [
     path: "./models/scene.glb",
   },
   {
-    name: "baked_texture",
+    name: "baked_texture_p1",
     type: "texture",
-    path: "./textures/baked_2.png",
+    path: "./textures/baked_part_1.png",
+  },
+  {
+    name: "baked_texture_p2",
+    type: "texture",
+    path: "./textures/baked_part_2.png",
   },
   {
     name: "noise_texture",
