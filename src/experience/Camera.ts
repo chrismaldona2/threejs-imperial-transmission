@@ -4,12 +4,14 @@ import { OrbitControls } from "three/examples/jsm/Addons.js";
 
 class Camera {
   private readonly experience = Experience.getInstance();
+  private readonly gui = this.experience.debug.instance;
   private readonly sizes = this.experience.sizes;
   private readonly scene = this.experience.scene;
   private readonly canvas = this.experience.canvas.domElement;
 
   readonly instance: THREE.PerspectiveCamera;
   readonly controls: OrbitControls;
+  private debugFolder?: typeof this.gui;
 
   constructor() {
     this.instance = new THREE.PerspectiveCamera(
@@ -39,8 +41,31 @@ class Camera {
     this.instance.updateProjectionMatrix();
   }
 
+  setupTweaks() {
+    this.debugFolder = this.gui.addFolder("Camera");
+    this.debugFolder
+      .add(this.instance.position, "x")
+      .min(-5)
+      .max(5)
+      .step(0.01)
+      .name("Position X");
+    this.debugFolder
+      .add(this.instance.position, "y")
+      .min(-5)
+      .max(5)
+      .step(0.01)
+      .name("Position Y");
+    this.debugFolder
+      .add(this.instance.position, "z")
+      .min(-5)
+      .max(5)
+      .step(0.01)
+      .name("Position Z");
+  }
+
   dispose() {
     this.controls.dispose();
+    this.debugFolder?.destroy();
   }
 }
 

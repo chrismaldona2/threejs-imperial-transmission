@@ -1,13 +1,16 @@
 import Experience from "../Experience";
+import Environment from "./Environment";
 import Ship from "./Ship";
 
 class World {
   private readonly experience = Experience.getInstance();
   private readonly resources = this.experience.resources;
 
-  ship?: Ship;
+  private ship?: Ship;
+  private environment?: Environment;
 
   constructor() {
+    this.environment = new Environment();
     this.resources.on("loadEnd", () => {
       this.ship = new Ship();
     });
@@ -19,6 +22,7 @@ class World {
 
   dispose() {
     this.ship?.dispose();
+    this.environment?.dispose();
   }
 }
 

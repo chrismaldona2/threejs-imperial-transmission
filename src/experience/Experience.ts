@@ -23,6 +23,7 @@ class Experience {
   private constructor() {
     Experience.instance = this;
 
+    this.debug = new Debug();
     this.timer = new Timer();
     this.sizes = new Sizes();
     this.canvas = new Canvas();
@@ -31,7 +32,6 @@ class Experience {
     this.renderer = new Renderer();
     this.resources = new Resources();
     this.world = new World();
-    this.debug = new Debug();
 
     this.timer.on("tick", () => this.update());
     this.sizes.on("resize", () => this.resize());
