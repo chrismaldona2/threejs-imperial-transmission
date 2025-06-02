@@ -1,10 +1,14 @@
-import { GLTFLoader, type GLTF } from "three/examples/jsm/Addons.js";
+import {
+  DRACOLoader,
+  GLTFLoader,
+  type GLTF,
+} from "three/examples/jsm/Addons.js";
 import { sources, type Source } from "../data/sources";
 import EventEmitter from "./EventEmitter";
-import { Texture, TextureLoader } from "three";
+import { CubeTexture, CubeTextureLoader, Texture, TextureLoader } from "three";
 
-type SupportedLoaders = GLTFLoader | TextureLoader;
-type SupportedFiles = GLTF | Texture;
+type SupportedLoaders = GLTFLoader | TextureLoader | CubeTextureLoader;
+type SupportedFiles = GLTF | Texture | CubeTexture;
 type LoadersRecord = Record<Source["type"], SupportedLoaders>;
 
 class Resources extends EventEmitter {
@@ -23,20 +27,60 @@ class Resources extends EventEmitter {
   }
 
   private initLoaders(): LoadersRecord {
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath("/draco/");
+    const gltfLoader = new GLTFLoader();
+    gltfLoader.setDRACOLoader(dracoLoader);
+
     return {
-      gltf: new GLTFLoader(),
+      gltf: gltfLoader,
       texture: new TextureLoader(),
+      cubemap: new CubeTextureLoader(),
     };
   }
 
   private loadAssets() {
     this.sources.forEach((src) => {
-      this.loaders[src.type].load(
-        src.path,
-        (file) => this.handleLoadSuccess(src.name, file),
-        undefined,
-        (error) => this.handleLoadError(src.name, error)
-      );
+      switch (src.type) {
+        case "gltf": {
+          const gltfLoader = this.loaders.gltf as GLTFLoader;
+          gltfLoader.load(
+            src.path,
+            (gltf) => this.handleLoadSuccess(src.name, gltf),
+            undefined,
+            (error) => this.handleLoadError(src.name, error)
+          );
+          break;
+        }
+
+        case "texture": {
+          const texLoader = this.loaders.texture as TextureLoader;
+          texLoader.load(
+            src.path,
+            (tex) => this.handleLoadSuccess(src.name, tex),
+            undefined,
+            (error) => this.handleLoadError(src.name, error)
+          );
+          break;
+        }
+
+        case "cubemap": {
+          const cubeLoader = this.loaders.cubemap as CubeTextureLoader;
+          cubeLoader.load(
+            src.path,
+            (cubeTex) => this.handleLoadSuccess(src.name, cubeTex),
+            undefined,
+            (error) => this.handleLoadError(src.name, error)
+          );
+          break;
+        }
+
+        default: {
+          console.warn(`Unknown source type: ${(src as Source).type}`);
+          this.handleFileLoad();
+          break;
+        }
+      }
     });
   }
 

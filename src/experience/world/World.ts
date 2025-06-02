@@ -10,9 +10,10 @@ class World {
   private environment?: Environment;
 
   constructor() {
-    this.environment = new Environment();
     this.resources.on("loadEnd", () => {
+      this.environment = new Environment();
       this.ship = new Ship();
+      console.log(this.experience.renderer.instance.info);
     });
   }
 

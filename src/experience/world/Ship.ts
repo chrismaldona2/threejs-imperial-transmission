@@ -34,14 +34,21 @@ class Ship {
       part2: this.resources.getAsset<THREE.Texture>("baked_texture_part2"),
       gold: this.resources.getAsset<THREE.Texture>("gold_matcap"),
       screen: this.resources.getAsset<THREE.Texture>("screen_matcap"),
+      roundLights: this.resources.getAsset<THREE.Texture>(
+        "round_lights_texture"
+      ),
     };
 
     this.textures.part1.flipY = false;
     this.textures.part2.flipY = false;
+    this.textures.roundLights.flipY = false;
     this.textures.part1.colorSpace = THREE.SRGBColorSpace;
     this.textures.part2.colorSpace = THREE.SRGBColorSpace;
     this.textures.gold.colorSpace = THREE.SRGBColorSpace;
     this.textures.screen.colorSpace = THREE.SRGBColorSpace;
+    this.textures.roundLights.generateMipmaps = false;
+    this.textures.roundLights.minFilter = THREE.NearestFilter;
+    this.textures.roundLights.magFilter = THREE.NearestFilter;
 
     this.materials = {
       part1: new THREE.MeshBasicMaterial({ map: this.textures.part1 }),
@@ -49,11 +56,10 @@ class Ship {
       glass: new THREE.MeshPhongMaterial({
         specular: 0xffffff,
         transparent: true,
-        opacity: 0.225,
+        opacity: 0.1,
         shininess: 50,
         fog: false,
         depthWrite: false,
-        side: THREE.DoubleSide,
         refractionRatio: 0.5,
         combine: THREE.MixOperation,
         reflectivity: 0.38,
@@ -62,6 +68,10 @@ class Ship {
       screen: new THREE.MeshMatcapMaterial({ matcap: this.textures.screen }),
       redLights: new THREE.MeshBasicMaterial({ color: 0xff1331 }),
       whiteLights: new THREE.MeshBasicMaterial({ color: 0xfefefe }),
+      roundLights: new THREE.MeshBasicMaterial({
+        map: this.textures.roundLights,
+        transparent: true,
+      }),
     };
 
     const meshes = {
@@ -71,6 +81,7 @@ class Ship {
       lights: {
         red: this.getMesh("red_lights"),
         white: this.getMesh("white_lights"),
+        round: this.getMesh("round_lights"),
       },
       screens: {
         middle: this.getMesh("screen_middle"),
@@ -80,8 +91,11 @@ class Ship {
       gold: this.getMesh("holoprojector_gold"),
     };
 
+    console.log(meshes.gold.position);
+
     meshes.part1.material = this.materials.part1;
     meshes.part2.material = this.materials.part2;
+
     meshes.glass.material = this.materials.glass;
     meshes.lights.red.material = this.materials.redLights;
     meshes.lights.white.material = this.materials.whiteLights;
@@ -89,6 +103,8 @@ class Ship {
     meshes.screens.left.material = this.materials.screen;
     meshes.screens.right.material = this.materials.screen;
     meshes.gold.material = this.materials.gold;
+
+    meshes.lights.round.material = this.materials.roundLights;
   }
 
   private getMesh(
