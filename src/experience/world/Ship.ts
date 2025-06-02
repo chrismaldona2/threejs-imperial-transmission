@@ -3,32 +3,42 @@ import Experience from "../Experience";
 import HologramEffect from "./HologramEffect";
 import type { GLTF } from "three/examples/jsm/Addons.js";
 import LightSpotEffect from "./LightSpotEffect";
+import AnimatedScreen from "./AnimatedScreen";
 
 class Ship {
   private readonly experience = Experience.getInstance();
   private readonly resources = this.experience.resources;
+  private readonly debug = this.experience.debug.instance;
 
-  private model: THREE.Object3D;
-  private vaderHologramEffect?: HologramEffect;
+  private ship: THREE.Object3D;
+  private darthVader: THREE.Object3D;
+
+  private hologramEffect?: HologramEffect;
   private lightSpotEffect?: LightSpotEffect;
 
   private textures: Record<string, THREE.Texture> = {};
   private materials: Record<string, THREE.Material> = {};
 
+  private tweaks?: typeof this.debug;
+
   constructor() {
-    const gltf = this.resources.getAsset<GLTF>("scene_model");
-    this.model = gltf.scene;
-    this.model.position.y -= 0.5;
+    const shipGltf = this.resources.getAsset<GLTF>("ship_model");
+    const darthVaderGltf = this.resources.getAsset<GLTF>("darth_vader_model");
+    this.ship = shipGltf.scene;
+    this.darthVader = darthVaderGltf.scene;
+    this.darthVader.position.y -= 0.15;
+
     this.setupMaterials();
 
-    /* MOUNT */
-    this.experience.scene.add(this.model);
+    this.experience.scene.add(this.ship, this.darthVader);
 
-    /* TWEAKS */
-    // this.setupTweaks();
+    this.setupTweaks();
   }
 
   private setupMaterials() {
+    this.lightSpotEffect = new LightSpotEffect();
+    this.hologramEffect = new HologramEffect();
+
     this.textures = {
       part1: this.resources.getAsset<THREE.Texture>("baked_texture_part1"),
       part2: this.resources.getAsset<THREE.Texture>("baked_texture_part2"),
@@ -65,13 +75,16 @@ class Ship {
         reflectivity: 0.38,
       }),
       gold: new THREE.MeshMatcapMaterial({ matcap: this.textures.gold }),
-      screen: new THREE.MeshMatcapMaterial({ matcap: this.textures.screen }),
+      screen: new AnimatedScreen().material,
       redLights: new THREE.MeshBasicMaterial({ color: 0xff1331 }),
       whiteLights: new THREE.MeshBasicMaterial({ color: 0xfefefe }),
       roundLights: new THREE.MeshBasicMaterial({
         map: this.textures.roundLights,
         transparent: true,
       }),
+      hologramSource: new THREE.MeshBasicMaterial({ color: 0xd6efff }),
+      hologramLight: this.lightSpotEffect.material,
+      hologram: this.hologramEffect.material,
     };
 
     const meshes = {
@@ -89,27 +102,33 @@ class Ship {
         right: this.getMesh("screen_right"),
       },
       gold: this.getMesh("holoprojector_gold"),
+      hologram: {
+        source: this.getMesh("hologram_source"),
+        light: this.getMesh("hologram_light"),
+        darthVader: this.getMesh("darth_vader", this.darthVader),
+      },
     };
-
-    console.log(meshes.gold.position);
 
     meshes.part1.material = this.materials.part1;
     meshes.part2.material = this.materials.part2;
-
     meshes.glass.material = this.materials.glass;
     meshes.lights.red.material = this.materials.redLights;
     meshes.lights.white.material = this.materials.whiteLights;
+
     meshes.screens.middle.material = this.materials.screen;
     meshes.screens.left.material = this.materials.screen;
     meshes.screens.right.material = this.materials.screen;
-    meshes.gold.material = this.materials.gold;
 
+    meshes.gold.material = this.materials.gold;
     meshes.lights.round.material = this.materials.roundLights;
+    meshes.hologram.source.material = this.materials.hologramSource;
+    meshes.hologram.light.material = this.materials.hologramLight;
+    meshes.hologram.darthVader.material = this.materials.hologram;
   }
 
   private getMesh(
     name: string,
-    context: THREE.Object3D = this.model
+    context: THREE.Object3D = this.ship
   ): THREE.Mesh {
     const mesh = context.getObjectByName(name);
     if (!mesh || !(mesh instanceof THREE.Mesh)) {
@@ -118,14 +137,50 @@ class Ship {
     return mesh;
   }
 
+  private setupTweaks() {
+    this.tweaks = this.debug.addFolder("Ship");
+    this.tweaks.open();
+
+    const holoprojectorTweaks = this.tweaks.addFolder("Holoprojector");
+    holoprojectorTweaks.open();
+
+    if (this.lightSpotEffect) {
+      const lightSpotTweaks = holoprojectorTweaks.addFolder("Light Spot");
+
+      if (this.materials.hologramSource instanceof THREE.MeshBasicMaterial) {
+        const debugObj = {
+          color: this.materials.hologramSource.color.getHex(),
+        };
+        lightSpotTweaks
+          .addColor(debugObj, "color")
+          .onChange(() => {
+            if (
+              this.materials.hologramSource instanceof THREE.MeshBasicMaterial
+            ) {
+              this.materials.hologramSource.color.set(debugObj.color);
+            }
+          })
+          .name("Source Color");
+      }
+
+      this.lightSpotEffect.setupTweaks(lightSpotTweaks);
+    }
+
+    if (this.hologramEffect) {
+      const hologramTweaks = holoprojectorTweaks.addFolder("Hologram");
+      this.hologramEffect.setupTweaks(hologramTweaks);
+    }
+  }
+
   update() {
-    this.vaderHologramEffect?.update();
+    this.hologramEffect?.update();
     this.lightSpotEffect?.update();
   }
 
   dispose() {
-    this.vaderHologramEffect?.dispose();
+    this.hologramEffect?.dispose();
     this.lightSpotEffect?.dispose();
+    this.tweaks?.destroy();
   }
 }
 export default Ship;

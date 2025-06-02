@@ -9,9 +9,14 @@ export type Source = GLTFSource | TextureSource | CubeMapSource;
 
 export const sources: Source[] = [
   {
-    name: "scene_model",
+    name: "ship_model",
     type: "gltf",
-    path: "./models/scene.glb",
+    path: "./models/ship.glb",
+  },
+  {
+    name: "darth_vader_model",
+    type: "gltf",
+    path: "./models/darth_vader.glb",
   },
   {
     name: "baked_texture_part1",
@@ -47,12 +52,12 @@ export const sources: Source[] = [
     name: "space_cubemap",
     type: "cubemap",
     path: [
-      "./textures/cubemaps/space/px.png",
-      "./textures/cubemaps/space/nx.png",
-      "./textures/cubemaps/space/py.png",
-      "./textures/cubemaps/space/ny.png",
-      "./textures/cubemaps/space/pz.png",
-      "./textures/cubemaps/space/nz.png",
+      "./textures/cubemaps/space_2/px.png",
+      "./textures/cubemaps/space_2/nx.png",
+      "./textures/cubemaps/space_2/py.png",
+      "./textures/cubemaps/space_2/ny.png",
+      "./textures/cubemaps/space_2/pz.png",
+      "./textures/cubemaps/space_2/nz.png",
     ],
   },
 ];

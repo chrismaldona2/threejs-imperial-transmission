@@ -38,4 +38,6 @@ void main() {
   vec3 finalColor = baseColor * alpha * falloff;
 
   gl_FragColor = vec4(finalColor, alpha);
+  #include <colorspace_fragment>
+  #include <tonemapping_fragment>
 }

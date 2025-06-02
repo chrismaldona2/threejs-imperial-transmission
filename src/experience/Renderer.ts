@@ -7,8 +7,10 @@ class Renderer {
   private readonly sizes = this.experience.sizes;
   private readonly scene = this.experience.scene;
   private readonly camera = this.experience.camera.instance;
+  private readonly debug = this.experience.debug.instance;
 
   readonly instance: THREE.WebGLRenderer;
+  private tweaks?: typeof this.debug;
 
   constructor() {
     this.instance = new THREE.WebGLRenderer({
@@ -17,6 +19,30 @@ class Renderer {
     });
     this.instance.setSize(this.sizes.width, this.sizes.height);
     this.instance.setPixelRatio(this.sizes.pixelRatio);
+
+    this.setupTweaks();
+  }
+
+  private setupTweaks() {
+    this.tweaks = this.debug.addFolder("Renderer");
+
+    this.tweaks
+      .add(this.instance, "toneMapping")
+      .options({
+        No: THREE.NoToneMapping,
+        Linear: THREE.LinearToneMapping,
+        Reinhard: THREE.ReinhardToneMapping,
+        Cineon: THREE.CineonToneMapping,
+        ACESFilmic: THREE.ACESFilmicToneMapping,
+      })
+      .name("Tone Mapping");
+
+    this.tweaks
+      .add(this.instance, "toneMappingExposure")
+      .min(0)
+      .max(2)
+      .step(0.01)
+      .name("Tone Mapping Exposure");
   }
 
   update() {
@@ -30,6 +56,7 @@ class Renderer {
 
   dispose() {
     this.instance.dispose();
+    this.tweaks?.destroy();
   }
 }
 

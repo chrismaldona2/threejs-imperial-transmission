@@ -4,7 +4,7 @@ class Debug {
   readonly instance: GUI;
 
   constructor() {
-    this.instance = new GUI({ title: "Tweaks" });
+    this.instance = new GUI({ title: "Tweaks", closeFolders: true });
   }
 
   dispose() {
