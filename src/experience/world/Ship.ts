@@ -3,7 +3,7 @@ import Experience from "../Experience";
 import HologramEffect from "./HologramEffect";
 import type { GLTF } from "three/examples/jsm/Addons.js";
 import LightSpotEffect from "./LightSpotEffect";
-import AnimatedScreen from "./AnimatedScreen";
+import AnimatedScreenPattern from "./AnimatedScreenPattern";
 
 class Ship {
   private readonly experience = Experience.getInstance();
@@ -15,6 +15,8 @@ class Ship {
 
   private hologramEffect?: HologramEffect;
   private lightSpotEffect?: LightSpotEffect;
+  private screenPattern_1?: AnimatedScreenPattern;
+  private screenPattern_2?: AnimatedScreenPattern;
 
   private textures: Record<string, THREE.Texture> = {};
   private materials: Record<string, THREE.Material> = {};
@@ -38,6 +40,8 @@ class Ship {
   private setupMaterials() {
     this.lightSpotEffect = new LightSpotEffect();
     this.hologramEffect = new HologramEffect();
+    this.screenPattern_1 = new AnimatedScreenPattern({ variant: "v1" });
+    this.screenPattern_2 = new AnimatedScreenPattern({ variant: "v2" });
 
     this.textures = {
       part1: this.resources.getAsset<THREE.Texture>("baked_texture_part1"),
@@ -56,9 +60,6 @@ class Ship {
     this.textures.part2.colorSpace = THREE.SRGBColorSpace;
     this.textures.gold.colorSpace = THREE.SRGBColorSpace;
     this.textures.screen.colorSpace = THREE.SRGBColorSpace;
-    this.textures.roundLights.generateMipmaps = false;
-    this.textures.roundLights.minFilter = THREE.NearestFilter;
-    this.textures.roundLights.magFilter = THREE.NearestFilter;
 
     this.materials = {
       part1: new THREE.MeshBasicMaterial({ map: this.textures.part1 }),
@@ -75,7 +76,9 @@ class Ship {
         reflectivity: 0.38,
       }),
       gold: new THREE.MeshMatcapMaterial({ matcap: this.textures.gold }),
-      screen: new AnimatedScreen().material,
+      screenLeft: this.screenPattern_1.material,
+      screenMiddle: this.screenPattern_2.material,
+      screenRight: this.screenPattern_2.material,
       redLights: new THREE.MeshBasicMaterial({ color: 0xff1331 }),
       whiteLights: new THREE.MeshBasicMaterial({ color: 0xfefefe }),
       roundLights: new THREE.MeshBasicMaterial({
@@ -115,9 +118,9 @@ class Ship {
     meshes.lights.red.material = this.materials.redLights;
     meshes.lights.white.material = this.materials.whiteLights;
 
-    meshes.screens.middle.material = this.materials.screen;
-    meshes.screens.left.material = this.materials.screen;
-    meshes.screens.right.material = this.materials.screen;
+    meshes.screens.left.material = this.materials.screenLeft;
+    meshes.screens.middle.material = this.materials.screenMiddle;
+    meshes.screens.right.material = this.materials.screenRight;
 
     meshes.gold.material = this.materials.gold;
     meshes.lights.round.material = this.materials.roundLights;
@@ -140,6 +143,12 @@ class Ship {
   private setupTweaks() {
     this.tweaks = this.debug.addFolder("Ship");
     this.tweaks.open();
+
+    if (this.screenPattern_1) {
+      const leftScreenTweaks = this.tweaks.addFolder("Left Screen");
+      leftScreenTweaks.open();
+      this.screenPattern_1.setupTweaks(leftScreenTweaks);
+    }
 
     const holoprojectorTweaks = this.tweaks.addFolder("Holoprojector");
     holoprojectorTweaks.open();
@@ -175,6 +184,7 @@ class Ship {
   update() {
     this.hologramEffect?.update();
     this.lightSpotEffect?.update();
+    this.screenPattern_1?.update();
   }
 
   dispose() {
