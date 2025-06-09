@@ -34,6 +34,17 @@ class AnimatedScreenPattern {
             uDisplacement: new THREE.Uniform(new THREE.Vector2(0.62, 0.68)),
             uSweepSpeed: new THREE.Uniform(0.5),
             uSweepFrequency: new THREE.Uniform(2.0),
+            uMeshAspectRatio: new THREE.Uniform(24 / 9),
+            uTargetPositions: new THREE.Uniform([
+              new THREE.Vector2(0.5, 0.3),
+              new THREE.Vector2(0.2, 0.8),
+              new THREE.Vector2(0.9, 0.8),
+            ]),
+            uTargetCount: new THREE.Uniform(3),
+            uTargetRadius: new THREE.Uniform(0.025),
+            uMinTargetRadiusPct: new THREE.Uniform(0.875),
+            uTargetColor: new THREE.Uniform(new THREE.Color(1.0, 0.0, 0.0)),
+            uTargetBlinkSpeed: new THREE.Uniform(2),
           },
         });
 

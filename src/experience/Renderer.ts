@@ -21,6 +21,8 @@ class Renderer {
     this.instance.setPixelRatio(this.sizes.pixelRatio);
 
     this.setupTweaks();
+
+    console.log(this.instance.getContext());
   }
 
   private setupTweaks() {
