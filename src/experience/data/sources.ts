@@ -3,9 +3,10 @@ type MultiplePathSource = { name: string; path: string[] };
 
 type GLTFSource = SinglePathSource & { type: "gltf" };
 type TextureSource = SinglePathSource & { type: "texture" };
+type AudioSource = SinglePathSource & { type: "audio" };
 type CubeMapSource = MultiplePathSource & { type: "cubemap" };
 
-export type Source = GLTFSource | TextureSource | CubeMapSource;
+export type Source = GLTFSource | TextureSource | CubeMapSource | AudioSource;
 
 export const sources: Source[] = [
   {
@@ -59,5 +60,10 @@ export const sources: Source[] = [
       "./textures/cubemaps/space_2/pz.png",
       "./textures/cubemaps/space_2/nz.png",
     ],
+  },
+  {
+    name: "ambient_sound",
+    type: "audio",
+    path: "./sounds/empty_room.mp3",
   },
 ];

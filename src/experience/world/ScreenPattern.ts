@@ -8,7 +8,7 @@ interface Options {
   variant: "v1" | "v2";
 }
 
-class AnimatedScreenPattern {
+class ScreenPattern {
   private readonly experience = Experience.getInstance();
   private readonly timer = this.experience.timer;
   private readonly debug = this.experience.debug.instance;
@@ -145,4 +145,4 @@ class AnimatedScreenPattern {
     this.material.dispose();
   }
 }
-export default AnimatedScreenPattern;
+export default ScreenPattern;

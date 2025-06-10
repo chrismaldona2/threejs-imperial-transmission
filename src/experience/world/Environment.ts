@@ -5,10 +5,15 @@ class Environment {
   private readonly experience = Experience.getInstance();
   private readonly scene = this.experience.scene;
   private readonly resources = this.experience.resources;
+  private readonly camera = this.experience.camera.instance;
   private readonly debug = this.experience.debug.instance;
 
   private ambientLight: THREE.AmbientLight;
   private environtmentMap: THREE.CubeTexture;
+
+  private audioListener: THREE.AudioListener;
+  private ambientSound: THREE.Audio;
+  private ambientSoundBuffer: AudioBuffer;
 
   private tweaks?: typeof this.debug;
 
@@ -25,6 +30,18 @@ class Environment {
     this.scene.backgroundIntensity = 1;
 
     this.scene.add(this.ambientLight);
+
+    this.audioListener = new THREE.AudioListener();
+    this.camera.add(this.audioListener);
+    this.ambientSound = new THREE.Audio(this.audioListener);
+    this.ambientSoundBuffer =
+      this.resources.getAsset<AudioBuffer>("ambient_sound");
+    this.ambientSound.setBuffer(this.ambientSoundBuffer);
+    this.ambientSound.autoplay = true;
+    this.ambientSound.loop = true;
+    this.ambientSound.setVolume(0.15);
+    this.ambientSound.play();
+
     this.setupTweaks();
   }
 
@@ -33,7 +50,18 @@ class Environment {
 
     const debugObj = {
       ambientLightColor: this.ambientLight.color.getHex(),
+      ambientSoundVolume: this.ambientSound.getVolume(),
     };
+
+    this.tweaks
+      .add(debugObj, "ambientSoundVolume")
+      .min(0)
+      .step(0.01)
+      .max(1)
+      .onChange(() => {
+        this.ambientSound.setVolume(debugObj.ambientSoundVolume);
+      })
+      .name("Ambient Sound Volume");
 
     const lightTweaks = this.tweaks.addFolder("Ambient Light");
     lightTweaks

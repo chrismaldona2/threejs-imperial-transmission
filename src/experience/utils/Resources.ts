@@ -5,10 +5,20 @@ import {
 } from "three/examples/jsm/Addons.js";
 import { sources, type Source } from "../data/sources";
 import EventEmitter from "./EventEmitter";
-import { CubeTexture, CubeTextureLoader, Texture, TextureLoader } from "three";
+import {
+  AudioLoader,
+  CubeTexture,
+  CubeTextureLoader,
+  Texture,
+  TextureLoader,
+} from "three";
 
-type SupportedLoaders = GLTFLoader | TextureLoader | CubeTextureLoader;
-type SupportedFiles = GLTF | Texture | CubeTexture;
+type SupportedLoaders =
+  | GLTFLoader
+  | TextureLoader
+  | CubeTextureLoader
+  | AudioLoader;
+type SupportedFiles = GLTF | Texture | CubeTexture | AudioBuffer;
 type LoadersRecord = Record<Source["type"], SupportedLoaders>;
 
 class Resources extends EventEmitter {
@@ -36,6 +46,7 @@ class Resources extends EventEmitter {
       gltf: gltfLoader,
       texture: new TextureLoader(),
       cubemap: new CubeTextureLoader(),
+      audio: new AudioLoader(),
     };
   }
 
@@ -66,9 +77,21 @@ class Resources extends EventEmitter {
 
         case "cubemap": {
           const cubeLoader = this.loaders.cubemap as CubeTextureLoader;
+
           cubeLoader.load(
             src.path,
             (cubeTex) => this.handleLoadSuccess(src.name, cubeTex),
+            undefined,
+            (error) => this.handleLoadError(src.name, error)
+          );
+          break;
+        }
+
+        case "audio": {
+          const audioLoader = this.loaders.audio as AudioLoader;
+          audioLoader.load(
+            src.path,
+            (buffer) => this.handleLoadSuccess(src.name, buffer),
             undefined,
             (error) => this.handleLoadError(src.name, error)
           );

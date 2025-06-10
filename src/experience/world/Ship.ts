@@ -3,7 +3,7 @@ import Experience from "../Experience";
 import HologramEffect from "./HologramEffect";
 import type { GLTF } from "three/examples/jsm/Addons.js";
 import LightSpotEffect from "./LightSpotEffect";
-import AnimatedScreenPattern from "./AnimatedScreenPattern";
+import ScreenPattern from "./ScreenPattern";
 
 class Ship {
   private readonly experience = Experience.getInstance();
@@ -15,8 +15,8 @@ class Ship {
 
   private hologramEffect?: HologramEffect;
   private lightSpotEffect?: LightSpotEffect;
-  private screenPattern_1?: AnimatedScreenPattern;
-  private screenPattern_2?: AnimatedScreenPattern;
+  private screenPattern_1?: ScreenPattern;
+  private screenPattern_2?: ScreenPattern;
 
   private textures: Record<string, THREE.Texture> = {};
   private materials: Record<string, THREE.Material> = {};
@@ -40,8 +40,8 @@ class Ship {
   private setupMaterials() {
     this.lightSpotEffect = new LightSpotEffect();
     this.hologramEffect = new HologramEffect();
-    this.screenPattern_1 = new AnimatedScreenPattern({ variant: "v1" });
-    this.screenPattern_2 = new AnimatedScreenPattern({ variant: "v2" });
+    this.screenPattern_1 = new ScreenPattern({ variant: "v1" });
+    this.screenPattern_2 = new ScreenPattern({ variant: "v2" });
 
     this.textures = {
       part1: this.resources.getAsset<THREE.Texture>("baked_texture_part1"),
