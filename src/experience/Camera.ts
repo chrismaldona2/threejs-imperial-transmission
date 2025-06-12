@@ -17,7 +17,7 @@ class Camera {
     this.instance = new THREE.PerspectiveCamera(
       70,
       this.sizes.width / this.sizes.height,
-      0.001,
+      0.01,
       100
     );
     this.instance.position.set(-0.5, 1, 3);

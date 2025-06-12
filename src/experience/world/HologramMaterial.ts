@@ -3,32 +3,57 @@ import vertexShader from "../../shaders/hologram/vertex.glsl";
 import fragmentShader from "../../shaders/hologram/fragment.glsl";
 import Experience from "../Experience";
 
-class HologramEffect {
+interface HologramMaterialOptions {
+  color?: THREE.ColorRepresentation;
+  animationSpeed?: number;
+  stripesAmount?: number;
+  stripeSharpness?: number;
+  fresnelSharpness?: number;
+  fresnelBoost?: number;
+  fresnelFalloffStart?: number;
+  glitchIntensity?: number;
+  blending?: THREE.Blending;
+}
+
+class HologramMaterial {
   private readonly experience = Experience.getInstance();
   private readonly timer = this.experience.timer;
   private readonly debug = this.experience.debug.instance;
 
   material: THREE.ShaderMaterial;
 
-  constructor() {
+  constructor(options: HologramMaterialOptions = {}) {
+    const defaults: HologramMaterialOptions = {
+      color: 0x2475cc,
+      animationSpeed: 0.01,
+      stripesAmount: 70,
+      stripeSharpness: 3,
+      fresnelSharpness: 1.5,
+      fresnelBoost: 1.5,
+      fresnelFalloffStart: 0.9,
+      glitchIntensity: 0.05,
+      blending: THREE.AdditiveBlending,
+    };
+    const config = { ...defaults, ...options };
+
     this.material = new THREE.ShaderMaterial({
       uniforms: {
         uTime: new THREE.Uniform(0),
-        uAnimationSpeed: new THREE.Uniform(0.01),
-        uColor: new THREE.Uniform(new THREE.Color(0x2475cc)),
-        uStripesAmount: new THREE.Uniform(70),
-        uStripeSharpness: new THREE.Uniform(3),
-        uFresnelSharpness: new THREE.Uniform(1.5),
-        uFresnelBoost: new THREE.Uniform(1.5),
-        uFresnelFalloffStart: new THREE.Uniform(0.9),
-        uGlitchIntensity: new THREE.Uniform(0.05),
+        uAnimationSpeed: new THREE.Uniform(config.animationSpeed),
+        uColor: new THREE.Uniform(new THREE.Color(config.color)),
+        uStripesAmount: new THREE.Uniform(config.stripesAmount),
+        uStripeSharpness: new THREE.Uniform(config.stripeSharpness),
+        uFresnelSharpness: new THREE.Uniform(config.fresnelSharpness),
+        uFresnelBoost: new THREE.Uniform(config.fresnelBoost),
+        uFresnelFalloffStart: new THREE.Uniform(config.fresnelFalloffStart),
+        uGlitchIntensity: new THREE.Uniform(config.glitchIntensity),
       },
       vertexShader,
       fragmentShader,
       transparent: true,
       depthWrite: false,
       side: THREE.DoubleSide,
-      blending: THREE.AdditiveBlending,
+      blending: config.blending,
     });
   }
 
@@ -104,4 +129,4 @@ class HologramEffect {
   }
 }
 
-export default HologramEffect;
+export default HologramMaterial;

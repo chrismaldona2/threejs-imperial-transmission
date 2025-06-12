@@ -9,7 +9,7 @@ class Environment {
   private readonly debug = this.experience.debug.instance;
 
   private ambientLight: THREE.AmbientLight;
-  private environtmentMap: THREE.CubeTexture;
+  private environmentMap: THREE.CubeTexture;
 
   private audioListener: THREE.AudioListener;
   private ambientSound: THREE.Audio;
@@ -20,12 +20,12 @@ class Environment {
   constructor() {
     this.ambientLight = new THREE.AmbientLight(0x8ea9cc, 0.8);
 
-    this.environtmentMap =
+    this.environmentMap =
       this.resources.getAsset<THREE.CubeTexture>("space_cubemap");
-    this.environtmentMap.colorSpace = THREE.SRGBColorSpace;
+    this.environmentMap.colorSpace = THREE.SRGBColorSpace;
 
-    this.scene.environment = this.environtmentMap;
-    this.scene.background = this.environtmentMap;
+    this.scene.environment = this.environmentMap;
+    this.scene.background = this.environmentMap;
     this.scene.backgroundRotation.set(3.18, 0, 5.89);
     this.scene.backgroundIntensity = 1;
 
@@ -40,10 +40,16 @@ class Environment {
     this.ambientSound.autoplay = true;
     this.ambientSound.loop = true;
     this.ambientSound.setVolume(0.15);
-    this.ambientSound.play();
+
+    window.addEventListener("click", this.playAmbientSound);
 
     this.setupTweaks();
   }
+
+  private playAmbientSound = () => {
+    this.ambientSound.play();
+    window.removeEventListener("click", this.playAmbientSound);
+  };
 
   private setupTweaks() {
     this.tweaks = this.debug.addFolder("Environment");
@@ -108,7 +114,7 @@ class Environment {
   dispose() {
     this.scene.remove(this.ambientLight);
     this.ambientLight.dispose();
-    this.environtmentMap.dispose();
+    this.environmentMap.dispose();
     this.tweaks?.destroy();
   }
 }

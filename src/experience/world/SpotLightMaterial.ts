@@ -3,7 +3,7 @@ import * as THREE from "three";
 import vertexShader from "../../shaders/lightspot/vertex.glsl";
 import fragmentShader from "../../shaders/lightspot/fragment.glsl";
 
-class LightSpotEffect {
+class SpotLightMaterial {
   private readonly experience = Experience.getInstance();
   private readonly resources = this.experience.resources;
   private readonly timer = this.experience.timer;
@@ -124,4 +124,4 @@ class LightSpotEffect {
   }
 }
 
-export default LightSpotEffect;
+export default SpotLightMaterial;

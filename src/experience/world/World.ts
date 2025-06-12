@@ -22,8 +22,8 @@ class World {
   }
 
   dispose() {
-    this.ship?.dispose();
     this.environment?.dispose();
+    this.ship?.dispose();
   }
 }
 

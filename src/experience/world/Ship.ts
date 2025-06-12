@@ -1,69 +1,115 @@
 import * as THREE from "three";
 import Experience from "../Experience";
-import HologramEffect from "./HologramEffect";
+import type GUI from "lil-gui";
 import type { GLTF } from "three/examples/jsm/Addons.js";
-import LightSpotEffect from "./LightSpotEffect";
-import ScreenPattern from "./ScreenPattern";
+import HologramMaterial from "./HologramMaterial";
+import ScreenPatternMaterial from "./ScreenPatternMaterial";
+import SpotLightMaterial from "./SpotLightMaterial";
+
+const materialNames = [
+  "bake01",
+  "bake02",
+  "glass",
+  "gold",
+  "hologramLightSource",
+  "redLights",
+  "whiteLights",
+  "roundedLights",
+  "hologram",
+  "leftScreenPattern",
+  "spotLight",
+] as const;
+
+const textureNames = [
+  "baked_texture_part1",
+  "baked_texture_part2",
+  "gold_matcap_texture",
+  "rounded_lights_texture",
+] as const;
+
+type MaterialNames = (typeof materialNames)[number];
+type TextureNames = (typeof textureNames)[number];
+
+interface MeshMaterialConfig {
+  name: string;
+  material: MaterialNames;
+  root?: THREE.Object3D;
+}
 
 class Ship {
   private readonly experience = Experience.getInstance();
   private readonly resources = this.experience.resources;
+  private readonly scene = this.experience.scene;
   private readonly debug = this.experience.debug.instance;
 
-  private ship: THREE.Object3D;
-  private darthVader: THREE.Object3D;
+  private group = new THREE.Group();
+  private shipModel!: THREE.Object3D;
+  private vaderModel!: THREE.Object3D;
+  private textures!: Record<TextureNames, THREE.Texture>;
+  private materials!: Record<MaterialNames, THREE.Material>;
 
-  private hologramEffect?: HologramEffect;
-  private lightSpotEffect?: LightSpotEffect;
-  private screenPattern_1?: ScreenPattern;
-  private screenPattern_2?: ScreenPattern;
+  /* CUSTOM SHADER MATERIALS */
+  private hologramMaterial!: HologramMaterial;
+  private spotLightMaterial!: SpotLightMaterial;
+  private screenPatternsMaterials!: {
+    left: ScreenPatternMaterial;
+  };
 
-  private textures: Record<string, THREE.Texture> = {};
-  private materials: Record<string, THREE.Material> = {};
-
-  private tweaks?: typeof this.debug;
+  private tweaksFolder?: GUI;
 
   constructor() {
-    const shipGltf = this.resources.getAsset<GLTF>("ship_model");
-    const darthVaderGltf = this.resources.getAsset<GLTF>("darth_vader_model");
-    this.ship = shipGltf.scene;
-    this.darthVader = darthVaderGltf.scene;
-    this.darthVader.position.y -= 0.15;
-
-    this.setupMaterials();
-
-    this.experience.scene.add(this.ship, this.darthVader);
-
+    this.group.name = "ShipGroup";
+    this.setupModels();
+    this.setupTextures();
+    this.createMaterials();
+    this.applyMaterials();
     this.setupTweaks();
+    this.scene.add(this.group);
   }
 
-  private setupMaterials() {
-    this.lightSpotEffect = new LightSpotEffect();
-    this.hologramEffect = new HologramEffect();
-    this.screenPattern_1 = new ScreenPattern({ variant: "v1" });
-    this.screenPattern_2 = new ScreenPattern({ variant: "v2" });
+  private setupModels() {
+    /* SHIP */
+    const shipGltf = this.resources.getAsset<GLTF>("ship_model");
+    this.shipModel = shipGltf.scene;
+    this.shipModel.name = "ShipModel";
 
-    this.textures = {
-      part1: this.resources.getAsset<THREE.Texture>("baked_texture_part1"),
-      part2: this.resources.getAsset<THREE.Texture>("baked_texture_part2"),
-      gold: this.resources.getAsset<THREE.Texture>("gold_matcap"),
-      screen: this.resources.getAsset<THREE.Texture>("screen_matcap"),
-      roundLights: this.resources.getAsset<THREE.Texture>(
-        "round_lights_texture"
-      ),
+    /* DARTH VADER */
+    const vaderGltf = this.resources.getAsset<GLTF>("darth_vader_model");
+    this.vaderModel = vaderGltf.scene;
+    this.vaderModel.position.y -= 0.2;
+    this.vaderModel.name = "VaderModel";
+
+    this.group.add(this.shipModel, this.vaderModel);
+  }
+
+  private setupTextures() {
+    this.textures = Object.fromEntries(
+      textureNames.map((textureName) => {
+        const texture = this.resources.getAsset<THREE.Texture>(textureName);
+        texture.flipY = false;
+        texture.colorSpace = THREE.SRGBColorSpace;
+        return [textureName, texture];
+      })
+    ) as Record<TextureNames, THREE.Texture>;
+  }
+
+  private createMaterials() {
+    /* CUSTOM MATERIALS INITIALIZATION  */
+    this.hologramMaterial = new HologramMaterial();
+    this.spotLightMaterial = new SpotLightMaterial();
+    this.screenPatternsMaterials = {
+      left: new ScreenPatternMaterial({ variant: "v1" }),
     };
 
-    this.textures.part1.flipY = false;
-    this.textures.part2.flipY = false;
-    this.textures.roundLights.flipY = false;
-    this.textures.part1.colorSpace = THREE.SRGBColorSpace;
-    this.textures.part2.colorSpace = THREE.SRGBColorSpace;
-    this.textures.gold.colorSpace = THREE.SRGBColorSpace;
-    this.textures.screen.colorSpace = THREE.SRGBColorSpace;
-
+    /* MATERIALS MAPPING */
     this.materials = {
-      part1: new THREE.MeshBasicMaterial({ map: this.textures.part1 }),
-      part2: new THREE.MeshBasicMaterial({ map: this.textures.part2 }),
+      // BASIC
+      bake01: new THREE.MeshBasicMaterial({
+        map: this.textures["baked_texture_part1"],
+      }),
+      bake02: new THREE.MeshBasicMaterial({
+        map: this.textures["baked_texture_part2"],
+      }),
       glass: new THREE.MeshPhongMaterial({
         specular: 0xffffff,
         transparent: true,
@@ -75,122 +121,77 @@ class Ship {
         combine: THREE.MixOperation,
         reflectivity: 0.38,
       }),
-      gold: new THREE.MeshMatcapMaterial({ matcap: this.textures.gold }),
-      screenLeft: this.screenPattern_1.material,
-      screenMiddle: this.screenPattern_2.material,
-      screenRight: this.screenPattern_2.material,
+      gold: new THREE.MeshMatcapMaterial({
+        matcap: this.textures["gold_matcap_texture"],
+      }),
       redLights: new THREE.MeshBasicMaterial({ color: 0xff1331 }),
-      whiteLights: new THREE.MeshBasicMaterial({ color: 0xfefefe }),
-      roundLights: new THREE.MeshBasicMaterial({
-        map: this.textures.roundLights,
+      whiteLights: new THREE.MeshBasicMaterial({
+        color: 0xfefefe,
+      }),
+      roundedLights: new THREE.MeshBasicMaterial({
+        map: this.textures["rounded_lights_texture"],
         transparent: true,
       }),
-      hologramSource: new THREE.MeshBasicMaterial({ color: 0xd6efff }),
-      hologramLight: this.lightSpotEffect.material,
-      hologram: this.hologramEffect.material,
+      hologramLightSource: new THREE.MeshBasicMaterial({
+        color: 0xd6efff,
+      }),
+      // CUSTOM
+      hologram: this.hologramMaterial.material,
+      spotLight: this.spotLightMaterial.material,
+      leftScreenPattern: this.screenPatternsMaterials.left.material,
     };
+  }
 
-    const meshes = {
-      part1: this.getMesh("part_1"),
-      part2: this.getMesh("part_2"),
-      glass: this.getMesh("glass"),
-      lights: {
-        red: this.getMesh("red_lights"),
-        white: this.getMesh("white_lights"),
-        round: this.getMesh("round_lights"),
-      },
-      screens: {
-        middle: this.getMesh("screen_middle"),
-        left: this.getMesh("screen_left"),
-        right: this.getMesh("screen_right"),
-      },
-      gold: this.getMesh("holoprojector_gold"),
-      hologram: {
-        source: this.getMesh("hologram_source"),
-        light: this.getMesh("hologram_light"),
-        darthVader: this.getMesh("darth_vader", this.darthVader),
-      },
-    };
+  private applyMaterials() {
+    const meshMaterialsMap: MeshMaterialConfig[] = [
+      { name: "part_1", material: "bake01" },
+      { name: "part_2", material: "bake02" },
+      { name: "glass", material: "glass" },
+      { name: "holoprojector_gold", material: "gold" },
+      { name: "red_lights", material: "redLights" },
+      { name: "white_lights", material: "whiteLights" },
+      { name: "rounded_lights", material: "roundedLights" },
+      { name: "hologram_source", material: "hologramLightSource" },
+      { name: "hologram_light", material: "spotLight" },
+      { name: "darth_vader", material: "hologram", root: this.vaderModel },
+      { name: "screen_left", material: "leftScreenPattern" },
+    ];
 
-    meshes.part1.material = this.materials.part1;
-    meshes.part2.material = this.materials.part2;
-    meshes.glass.material = this.materials.glass;
-    meshes.lights.red.material = this.materials.redLights;
-    meshes.lights.white.material = this.materials.whiteLights;
-
-    meshes.screens.left.material = this.materials.screenLeft;
-    meshes.screens.middle.material = this.materials.screenMiddle;
-    meshes.screens.right.material = this.materials.screenRight;
-
-    meshes.gold.material = this.materials.gold;
-    meshes.lights.round.material = this.materials.roundLights;
-    meshes.hologram.source.material = this.materials.hologramSource;
-    meshes.hologram.light.material = this.materials.hologramLight;
-    meshes.hologram.darthVader.material = this.materials.hologram;
+    meshMaterialsMap.forEach((record) => {
+      const mesh = this.getMesh(record.name, record.root);
+      if (mesh) mesh.material = this.materials[record.material];
+    });
   }
 
   private getMesh(
     name: string,
-    context: THREE.Object3D = this.ship
-  ): THREE.Mesh {
-    const mesh = context.getObjectByName(name);
+    root: THREE.Object3D = this.shipModel
+  ): THREE.Mesh | null {
+    const mesh = root.getObjectByName(name);
     if (!mesh || !(mesh instanceof THREE.Mesh)) {
-      throw new Error(`Couldn’t find mesh named "${name}"`);
+      console.warn(`Lab: couldn’t find mesh named "${name}"`);
+      return null;
     }
     return mesh;
   }
 
   private setupTweaks() {
-    this.tweaks = this.debug.addFolder("Ship");
-    this.tweaks.open();
+    this.tweaksFolder = this.debug.addFolder("Ship");
+    this.tweaksFolder.open();
 
-    if (this.screenPattern_1) {
-      const leftScreenTweaks = this.tweaks.addFolder("Left Screen");
-      leftScreenTweaks.open();
-      this.screenPattern_1.setupTweaks(leftScreenTweaks);
-    }
-
-    const holoprojectorTweaks = this.tweaks.addFolder("Holoprojector");
-    holoprojectorTweaks.open();
-
-    if (this.lightSpotEffect) {
-      const lightSpotTweaks = holoprojectorTweaks.addFolder("Light Spot");
-
-      if (this.materials.hologramSource instanceof THREE.MeshBasicMaterial) {
-        const debugObj = {
-          color: this.materials.hologramSource.color.getHex(),
-        };
-        lightSpotTweaks
-          .addColor(debugObj, "color")
-          .onChange(() => {
-            if (
-              this.materials.hologramSource instanceof THREE.MeshBasicMaterial
-            ) {
-              this.materials.hologramSource.color.set(debugObj.color);
-            }
-          })
-          .name("Source Color");
-      }
-
-      this.lightSpotEffect.setupTweaks(lightSpotTweaks);
-    }
-
-    if (this.hologramEffect) {
-      const hologramTweaks = holoprojectorTweaks.addFolder("Hologram");
-      this.hologramEffect.setupTweaks(hologramTweaks);
-    }
+    const hologramFolder = this.tweaksFolder.addFolder("Hologram");
+    this.hologramMaterial.setupTweaks(hologramFolder);
   }
 
   update() {
-    this.hologramEffect?.update();
-    this.lightSpotEffect?.update();
-    this.screenPattern_1?.update();
+    this.hologramMaterial.update();
+    this.spotLightMaterial.update();
+    this.screenPatternsMaterials.left.update();
   }
 
   dispose() {
-    this.hologramEffect?.dispose();
-    this.lightSpotEffect?.dispose();
-    this.tweaks?.destroy();
+    this.tweaksFolder?.destroy();
   }
 }
+
 export default Ship;

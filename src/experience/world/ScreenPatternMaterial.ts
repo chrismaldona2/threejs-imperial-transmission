@@ -8,7 +8,7 @@ interface Options {
   variant: "v1" | "v2";
 }
 
-class ScreenPattern {
+class ScreenPatternMaterial {
   private readonly experience = Experience.getInstance();
   private readonly timer = this.experience.timer;
   private readonly debug = this.experience.debug.instance;
@@ -145,4 +145,4 @@ class ScreenPattern {
     this.material.dispose();
   }
 }
-export default ScreenPattern;
+export default ScreenPatternMaterial;

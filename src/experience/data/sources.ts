@@ -35,19 +35,14 @@ export const sources: Source[] = [
     path: "./textures/noise.png",
   },
   {
-    name: "gold_matcap",
+    name: "gold_matcap_texture",
     type: "texture",
     path: "./textures/matcaps/gold_matcap_2.jpg",
   },
   {
-    name: "screen_matcap",
+    name: "rounded_lights_texture",
     type: "texture",
-    path: "./textures/matcaps/black_screen_matcap_5.jpg",
-  },
-  {
-    name: "round_lights_texture",
-    type: "texture",
-    path: "./textures/bake/round_lights.png",
+    path: "./textures/bake/rounded_lights.png",
   },
   {
     name: "space_cubemap",
