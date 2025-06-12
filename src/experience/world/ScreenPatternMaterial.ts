@@ -55,6 +55,7 @@ class ScreenPatternMaterial {
           fragmentShader: fragmentShaderV2,
           uniforms: {
             uTime: { value: 0 },
+            uMeshAspectRatio: new THREE.Uniform(16 / 9),
           },
         });
         break;

@@ -16,8 +16,9 @@ const materialNames = [
   "whiteLights",
   "roundedLights",
   "hologram",
-  "leftScreenPattern",
   "spotLight",
+  "leftScreenPattern",
+  "boardScreenPattern01",
 ] as const;
 
 const textureNames = [
@@ -53,6 +54,9 @@ class Ship {
   private spotLightMaterial!: SpotLightMaterial;
   private screenPatternsMaterials!: {
     left: ScreenPatternMaterial;
+    board: {
+      "01": ScreenPatternMaterial;
+    };
   };
 
   private tweaksFolder?: GUI;
@@ -99,6 +103,9 @@ class Ship {
     this.spotLightMaterial = new SpotLightMaterial();
     this.screenPatternsMaterials = {
       left: new ScreenPatternMaterial({ variant: "v1" }),
+      board: {
+        "01": new ScreenPatternMaterial({ variant: "v2" }),
+      },
     };
 
     /* MATERIALS MAPPING */
@@ -139,6 +146,7 @@ class Ship {
       hologram: this.hologramMaterial.material,
       spotLight: this.spotLightMaterial.material,
       leftScreenPattern: this.screenPatternsMaterials.left.material,
+      boardScreenPattern01: this.screenPatternsMaterials.board["01"].material,
     };
   }
 
@@ -155,6 +163,7 @@ class Ship {
       { name: "hologram_light", material: "spotLight" },
       { name: "darth_vader", material: "hologram", root: this.vaderModel },
       { name: "screen_left", material: "leftScreenPattern" },
+      { name: "board_screen001", material: "boardScreenPattern01" },
     ];
 
     meshMaterialsMap.forEach((record) => {
@@ -187,6 +196,7 @@ class Ship {
     this.hologramMaterial.update();
     this.spotLightMaterial.update();
     this.screenPatternsMaterials.left.update();
+    this.screenPatternsMaterials.board["01"].update();
   }
 
   dispose() {
