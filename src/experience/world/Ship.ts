@@ -18,6 +18,7 @@ const materialNames = [
   "hologram",
   "spotLight",
   "leftScreenPattern",
+  "boardScreenPattern",
   "boardScreenPattern01",
 ] as const;
 
@@ -55,6 +56,7 @@ class Ship {
   private screenPatternsMaterials!: {
     left: ScreenPatternMaterial;
     board: {
+      "00": ScreenPatternMaterial;
       "01": ScreenPatternMaterial;
     };
   };
@@ -102,9 +104,10 @@ class Ship {
     this.hologramMaterial = new HologramMaterial();
     this.spotLightMaterial = new SpotLightMaterial();
     this.screenPatternsMaterials = {
-      left: new ScreenPatternMaterial({ variant: "v1" }),
+      left: new ScreenPatternMaterial({ variant: "radar" }),
       board: {
-        "01": new ScreenPatternMaterial({ variant: "v2" }),
+        "00": new ScreenPatternMaterial({ variant: "orbitals" }),
+        "01": new ScreenPatternMaterial({ variant: "wave" }),
       },
     };
 
@@ -146,6 +149,7 @@ class Ship {
       hologram: this.hologramMaterial.material,
       spotLight: this.spotLightMaterial.material,
       leftScreenPattern: this.screenPatternsMaterials.left.material,
+      boardScreenPattern: this.screenPatternsMaterials.board["00"].material,
       boardScreenPattern01: this.screenPatternsMaterials.board["01"].material,
     };
   }
@@ -163,6 +167,7 @@ class Ship {
       { name: "hologram_light", material: "spotLight" },
       { name: "darth_vader", material: "hologram", root: this.vaderModel },
       { name: "screen_left", material: "leftScreenPattern" },
+      { name: "board_screen", material: "boardScreenPattern" },
       { name: "board_screen001", material: "boardScreenPattern01" },
     ];
 
@@ -196,6 +201,7 @@ class Ship {
     this.hologramMaterial.update();
     this.spotLightMaterial.update();
     this.screenPatternsMaterials.left.update();
+    this.screenPatternsMaterials.board["00"].update();
     this.screenPatternsMaterials.board["01"].update();
   }
 

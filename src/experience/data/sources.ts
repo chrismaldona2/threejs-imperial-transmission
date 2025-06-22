@@ -22,7 +22,7 @@ export const sources: Source[] = [
   {
     name: "baked_texture_part1",
     type: "texture",
-    path: "./textures/bake/baked_part1_4k.png",
+    path: "./textures/bake/baked_part1_4k_edited.png",
   },
   {
     name: "baked_texture_part2",
