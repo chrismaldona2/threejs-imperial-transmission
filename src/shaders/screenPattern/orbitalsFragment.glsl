@@ -1,5 +1,6 @@
 varying vec2 vUv;
 
+uniform float uTime; 
 uniform vec3 uBackgroundColor;
 uniform vec3 uGridColor;
 uniform vec2 uGridDisplacement;
@@ -8,9 +9,8 @@ uniform float uGridColumns;
 uniform float uGridRows;
 uniform float uGridLineThickness;
 uniform vec3 uRingColor;
-uniform float uTime; 
 uniform float uRingThickness;
-uniform float uRingIrregularity;
+uniform float uRingAspectScale;
 
 void main() {
   vec2 displacedUv = vUv + uGridDisplacement;
@@ -34,16 +34,19 @@ void main() {
   vec3 gridColor = mix(uBackgroundColor, uGridColor, strength);
 
   vec2 ring1Uv = vUv - 0.5;
+  ring1Uv.x *= uRingAspectScale;
   float dist1 = length(ring1Uv);
 
   float ringStrength = 0.0;
-  float radius = 0.5;
+  float radius = 0.48;
   float ring = abs(dist1 - radius);
   ring = smoothstep(uRingThickness, 0.0, ring);
   ringStrength = max(ringStrength, ring);
 
   vec2 ring2Uv = vUv - 0.5;
   ring2Uv.x += 0.25;
+  ring2Uv.x *= uRingAspectScale;
+
   float dist2 = length(ring2Uv);
 
   float secondRingStrength = 0.0;
@@ -61,9 +64,7 @@ void main() {
   hCenterDist = length(hCenterDist);
   float hLine = smoothstep(0.01, 0.0, hCenterDist);
 
-
   ringStrength += vLine + hLine;
-
 
   vec3 finalColor = mix(gridColor, uRingColor, ringStrength);
 

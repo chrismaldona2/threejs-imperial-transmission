@@ -13,7 +13,7 @@ uniform float uSweepFrequency;
 uniform float uSweepThickness;
 uniform vec3 uSweepColor;
 
-uniform float uAspectRatio;
+uniform float uAspectScale;
 
 uniform vec2 uTargetPositions[10];
 uniform int uTargetCount;
@@ -23,7 +23,6 @@ uniform float uTargetBlinkSpeed;
 uniform float uMinTargetRadiusPercentage;
 
 #include ../partials/scannerBar.glsl
-
 
 void main() {
   vec2 displacedUv = vUv + uGridDisplacement;
@@ -47,8 +46,8 @@ void main() {
   for (int i = 0; i < uTargetCount; i++) {
     vec2 targetPos = uTargetPositions[i];
     vec2 adjustedUv = vUv;
-    adjustedUv.x *= uAspectRatio;
-    targetPos.x *= uAspectRatio;
+    adjustedUv.x *= uAspectScale;
+    targetPos.x *= uAspectScale;
 
     float animatedRadius = uTargetRadius * (uMinTargetRadiusPercentage + (1.0 - uMinTargetRadiusPercentage) * sin(uTime * uTargetBlinkSpeed));
 

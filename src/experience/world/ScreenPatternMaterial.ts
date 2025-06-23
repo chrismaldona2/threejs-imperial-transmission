@@ -16,7 +16,7 @@ interface RadarUniformValues {
   uSweepSpeed: number;
   uSweepFrequency: number;
   uSweepColor: THREE.Color;
-  uAspectRatio: number;
+  uAspectScale: number /* You may want to modify this if the mesh is not a perfect square / Otherwise, the pattern can look stretched */;
   uTargetPositions: THREE.Vector2[] /* Maximum of 10, but can be modified in the fragment shader */;
   uTargetCount: number /* Same comment as above */;
   uTargetRadius: number;
@@ -82,7 +82,7 @@ class ScreenPatternMaterial {
           uSweepFrequency: new THREE.Uniform(2.5),
           uSweepThickness: new THREE.Uniform(0.08),
           uSweepColor: new THREE.Uniform(new THREE.Color(0xff2441)),
-          uAspectRatio: new THREE.Uniform(25 / 9),
+          uAspectScale: new THREE.Uniform(25 / 9),
           uTargetPositions: new THREE.Uniform([
             new THREE.Vector2(0.5, 0.3),
             new THREE.Vector2(0.2, 0.8),
@@ -123,6 +123,7 @@ class ScreenPatternMaterial {
       }
       case "orbitals": {
         return {
+          uTime: new THREE.Uniform(0),
           uBackgroundColor: new THREE.Uniform(new THREE.Color(0.0, 0.0, 0.0)),
           uGridColor: new THREE.Uniform(new THREE.Color("orange")),
           uGridDisplacement: new THREE.Uniform(new THREE.Vector2(0)),
@@ -131,10 +132,8 @@ class ScreenPatternMaterial {
           uGridRows: new THREE.Uniform(10),
           uGridLineThickness: new THREE.Uniform(0.2),
           uRingColor: new THREE.Uniform(new THREE.Color("yellow")),
-          uTime: new THREE.Uniform(0),
-          uRingCount: new THREE.Uniform(5),
           uRingThickness: new THREE.Uniform(0.01),
-          uRingRotationSpeed: new THREE.Uniform(0.5),
+          uRingAspectScale: new THREE.Uniform(1),
         };
       }
       default:
