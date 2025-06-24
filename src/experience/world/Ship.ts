@@ -17,9 +17,14 @@ const materialNames = [
   "roundedLights",
   "hologram",
   "spotLight",
-  "leftScreenPattern",
-  "boardScreenPattern",
-  "boardScreenPattern01",
+  "radarPattern",
+  "radarPatternVariant",
+  "radarPatternVariant2",
+  "wavePattern",
+  "wavePatternVariant2",
+  "wavePatternVariant3",
+  "orbitalsPattern",
+  "targetingPattern",
 ] as const;
 
 const textureNames = [
@@ -55,9 +60,16 @@ class Ship {
   private spotLightMaterial!: SpotLightMaterial;
   private screenPatternsMaterials!: {
     left: ScreenPatternMaterial;
-    board: {
+    right: {
       "00": ScreenPatternMaterial;
       "01": ScreenPatternMaterial;
+      "02": ScreenPatternMaterial;
+      "03": ScreenPatternMaterial;
+    };
+    corner: {
+      "00": ScreenPatternMaterial;
+      "01": ScreenPatternMaterial;
+      "02": ScreenPatternMaterial;
     };
   };
 
@@ -104,10 +116,39 @@ class Ship {
     this.hologramMaterial = new HologramMaterial();
     this.spotLightMaterial = new SpotLightMaterial();
     this.screenPatternsMaterials = {
-      left: new ScreenPatternMaterial({ variant: "radar" }),
-      board: {
+      left: new ScreenPatternMaterial({
+        variant: "radar",
+        uniforms: {
+          uAspectScale: 2.777,
+        },
+      }),
+      right: {
         "00": new ScreenPatternMaterial({ variant: "orbitals" }),
         "01": new ScreenPatternMaterial({ variant: "wave" }),
+        "02": new ScreenPatternMaterial({ variant: "targeting" }),
+        "03": new ScreenPatternMaterial({
+          variant: "radar",
+          uniforms: {
+            uTargetCount: 2,
+            uGridColor: new THREE.Color(0xbec5e5),
+            uSweepColor: new THREE.Color(0xbec5e5),
+            uTargetColor: new THREE.Color(0xbec5e5),
+            uGridColumns: 15,
+            uGridRows: 5,
+            uTargetRadius: 0.1,
+            uAspectScale: 3.888,
+          },
+        }),
+      },
+      corner: {
+        "00": new ScreenPatternMaterial({
+          variant: "radar",
+          uniforms: {
+            uAspectScale: 3.333,
+          },
+        }),
+        "01": new ScreenPatternMaterial({ variant: "wave" }),
+        "02": new ScreenPatternMaterial({ variant: "wave" }),
       },
     };
 
@@ -148,9 +189,14 @@ class Ship {
       // CUSTOM
       hologram: this.hologramMaterial.material,
       spotLight: this.spotLightMaterial.material,
-      leftScreenPattern: this.screenPatternsMaterials.left.material,
-      boardScreenPattern: this.screenPatternsMaterials.board["00"].material,
-      boardScreenPattern01: this.screenPatternsMaterials.board["01"].material,
+      radarPattern: this.screenPatternsMaterials.left.material,
+      orbitalsPattern: this.screenPatternsMaterials.right["00"].material,
+      wavePattern: this.screenPatternsMaterials.right["01"].material,
+      targetingPattern: this.screenPatternsMaterials.right["02"].material,
+      radarPatternVariant: this.screenPatternsMaterials.right["03"].material,
+      radarPatternVariant2: this.screenPatternsMaterials.corner["00"].material,
+      wavePatternVariant2: this.screenPatternsMaterials.corner["01"].material,
+      wavePatternVariant3: this.screenPatternsMaterials.corner["02"].material,
     };
   }
 
@@ -166,9 +212,14 @@ class Ship {
       { name: "hologram_source", material: "hologramLightSource" },
       { name: "hologram_light", material: "spotLight" },
       { name: "darth_vader", material: "hologram", root: this.vaderModel },
-      { name: "screen_left", material: "leftScreenPattern" },
-      { name: "board_screen", material: "boardScreenPattern" },
-      { name: "board_screen001", material: "boardScreenPattern01" },
+      { name: "left_board_screen", material: "radarPattern" },
+      { name: "right_board_screen", material: "orbitalsPattern" },
+      { name: "right_board_screen001", material: "wavePattern" },
+      { name: "right_board_screen002", material: "radarPatternVariant" },
+      { name: "right_board_screen003", material: "targetingPattern" },
+      { name: "corner_board_screen", material: "radarPatternVariant2" },
+      { name: "corner_board_screen001", material: "wavePatternVariant2" },
+      { name: "corner_board_screen002", material: "wavePatternVariant2" },
     ];
 
     meshMaterialsMap.forEach((record) => {
@@ -201,8 +252,13 @@ class Ship {
     this.hologramMaterial.update();
     this.spotLightMaterial.update();
     this.screenPatternsMaterials.left.update();
-    this.screenPatternsMaterials.board["00"].update();
-    this.screenPatternsMaterials.board["01"].update();
+    this.screenPatternsMaterials.right["00"].update();
+    this.screenPatternsMaterials.right["01"].update();
+    this.screenPatternsMaterials.right["02"].update();
+    this.screenPatternsMaterials.right["03"].update();
+    this.screenPatternsMaterials.corner["00"].update();
+    this.screenPatternsMaterials.corner["01"].update();
+    this.screenPatternsMaterials.corner["02"].update();
   }
 
   dispose() {

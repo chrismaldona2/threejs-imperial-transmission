@@ -2,71 +2,89 @@ varying vec2 vUv;
 
 uniform float uTime; 
 uniform vec3 uBackgroundColor;
+
 uniform vec3 uGridColor;
 uniform vec2 uGridDisplacement;
-uniform float uIntensity;
+uniform float uGridIntensity;
 uniform float uGridColumns;
 uniform float uGridRows;
-uniform float uGridLineThickness;
+uniform float uGridLinesThickness;
+
 uniform vec3 uRingColor;
 uniform float uRingThickness;
 uniform float uRingAspectScale;
 
+uniform int uTargetCount;
+uniform vec3 uTargetColor;
+uniform vec2 uTargetPositions[5];
+uniform float uTargetAspectScale;
+uniform float uTargetRadius;
+uniform float uTargetBlinkSpeed;
+uniform float uMinTargetRadiusPercentage;
+
+uniform float uLineAnimationSpeed;
+uniform float uLinesAspectScale;
+uniform float uLinesThickness;
+
 void main() {
-  vec2 displacedUv = vUv + uGridDisplacement;
-  float strength = 0.0;
+  vec2 gridUv = vUv + uGridDisplacement;
+  float horizontalLines = smoothstep(1.0 - uGridLinesThickness, 1.0, mod(gridUv.x * uGridColumns, 1.0));
+  horizontalLines *= smoothstep(1.0, uGridLinesThickness, horizontalLines);
+  float verticalLines = smoothstep(1.0 - uGridLinesThickness, 1.0, mod(gridUv.y * uGridRows, 1.0));
+  verticalLines *= smoothstep(1.0, uGridLinesThickness, verticalLines);
+  float grid = clamp((verticalLines + horizontalLines) * uGridIntensity, 0.0, 1.0);
+
+  vec2 outerRingPos = vUv - 0.5;
+  outerRingPos.x *= uRingAspectScale;
+  float outerRingDist = length(outerRingPos);
+  float outerRingRadius = 0.48;
+  float outerRing = abs(outerRingDist - outerRingRadius);
+  outerRing = smoothstep(uRingThickness, 0.0, outerRing);
+
+  vec2 innerRingPos = vUv;
+  innerRingPos.y -= 0.5;
+  innerRingPos.x -= 0.25;
+  innerRingPos.x *= uRingAspectScale;
+  float innerRingDist = length(innerRingPos);
+  float innerRingRadius = 0.2;
+  float innerRing = abs(innerRingDist - innerRingRadius);
+  innerRing = smoothstep(uRingThickness, 0.0, innerRing);
+
+  float rings = outerRing + innerRing;
+
+  vec2 adjustedUv = vUv - 0.5;
+  adjustedUv.x *= uLinesAspectScale;
+  adjustedUv += 0.5;
+  float hLineY = (adjustedUv.y - 0.5) + (sin(uTime) * uLineAnimationSpeed);
+  float hCenterDist = length(hLineY);
+  float hLine = smoothstep(uLinesThickness, 0.0, hCenterDist);
   
-  float smoothStart = 1.0 - uGridLineThickness;
-  float smoothEnd = uGridLineThickness;
-  
-  float horizontalLines = mod(displacedUv.x * uGridColumns, 1.0);
-  horizontalLines = smoothstep(smoothStart, 1.0, horizontalLines);
-  horizontalLines *= smoothstep(1.0, smoothEnd, horizontalLines);
-
-  float verticalLines = mod(displacedUv.y * uGridRows, 1.0);
-  verticalLines = smoothstep(smoothStart, 1.0, verticalLines);
-  verticalLines *= smoothstep(1.0, smoothEnd, verticalLines);
-
-  strength += verticalLines + horizontalLines;
-  strength *= uIntensity;
-  strength = clamp(strength, 0.0, 1.0);
-
-  vec3 gridColor = mix(uBackgroundColor, uGridColor, strength);
-
-  vec2 ring1Uv = vUv - 0.5;
-  ring1Uv.x *= uRingAspectScale;
-  float dist1 = length(ring1Uv);
-
-  float ringStrength = 0.0;
-  float radius = 0.48;
-  float ring = abs(dist1 - radius);
-  ring = smoothstep(uRingThickness, 0.0, ring);
-  ringStrength = max(ringStrength, ring);
-
-  vec2 ring2Uv = vUv - 0.5;
-  ring2Uv.x += 0.25;
-  ring2Uv.x *= uRingAspectScale;
-
-  float dist2 = length(ring2Uv);
-
-  float secondRingStrength = 0.0;
-  float secondRadius = 0.2;
-  float secondRing = abs(dist2 - secondRadius);
-  secondRing = smoothstep(uRingThickness, 0.0, secondRing);
-
-  ringStrength = max(ringStrength, secondRing);
-
-  float vCenterDist = abs(vUv.y - 0.5);
+  float vCenterDist = abs(adjustedUv.x - 0.5);
   vCenterDist = length(vCenterDist);
-  float vLine = smoothstep(0.0125, 0.0, vCenterDist);
+  float vLine = smoothstep(uLinesThickness, 0.0, vCenterDist);
 
-  float hCenterDist = abs(vUv.x - 0.5);
-  hCenterDist = length(hCenterDist);
-  float hLine = smoothstep(0.01, 0.0, hCenterDist);
+  float crosslines = vLine + hLine;
 
-  ringStrength += vLine + hLine;
+  vec3 baseColor = mix(uBackgroundColor, uGridColor, grid);
+  vec3 finalColor = mix(baseColor, uRingColor, rings + crosslines);
 
-  vec3 finalColor = mix(gridColor, uRingColor, ringStrength);
+  if (uTargetCount > 0) {
+    float targetStrength = 0.0;
+    for (int i = 0; i < uTargetCount; i++) {
+      vec2 targetPos = uTargetPositions[i];
+      vec2 adjustedUv = vUv;
+      adjustedUv.x *= uTargetAspectScale;
+      targetPos.x *= uTargetAspectScale;
+
+      float animatedRadius = uTargetRadius * (uMinTargetRadiusPercentage + (1.0 - uMinTargetRadiusPercentage) * sin(uTime * uTargetBlinkSpeed));
+
+      float dist = distance(adjustedUv, targetPos);
+      if (dist < animatedRadius) {
+        targetStrength = max(targetStrength, 1.0 - smoothstep(0.0, animatedRadius, dist));
+      }
+    }
+    finalColor = mix(finalColor, uTargetColor, targetStrength);
+  }
 
   gl_FragColor = vec4(finalColor, 1.0);
   #include <colorspace_fragment>
