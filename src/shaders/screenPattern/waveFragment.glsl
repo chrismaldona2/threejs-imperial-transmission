@@ -15,6 +15,7 @@ uniform float uTime;
 uniform float uWaveAmplitude;
 uniform float uWaveFrequency;
 uniform float uWaveThickness;
+uniform float uWaveSpeed;
 
 uniform float uSweepSpeed;
 uniform float uSweepFrequency;
@@ -33,7 +34,7 @@ void main() {
   verticalLines *= smoothstep(1.0, uGridLinesThickness, verticalLines);
   float grid = clamp((verticalLines + horizontalLines) * uGridIntensity, 0.0, 1.0);
 
-  float waveY = 0.5 + sin((vUv.x + uTime * 0.5) * uWaveFrequency) * uWaveAmplitude;
+  float waveY = 0.5 + sin((vUv.x + uTime * uWaveSpeed) * uWaveFrequency) * uWaveAmplitude;
   float distToWave = abs(vUv.y - waveY);
   float waveStrength = 1.0 - smoothstep(0.0, uWaveThickness, distToWave);
 

@@ -1,8 +1,8 @@
 varying vec2 vUv;
 uniform float uTime;
 uniform float uAnimationSpeed;
-uniform float uAspectScale;
 
+uniform float uLinesAspectScale;
 uniform float uRadialLinesCount;
 uniform vec3 uBackgroundColor;
 uniform vec3 uLinesColor;
@@ -25,14 +25,13 @@ float drawLine(float coord, float thickness) {
 
 void main() {
   vec2 adjustedUv = vUv - 0.5;
-  adjustedUv.x *= uAspectScale;
-
+  adjustedUv.x *= uLinesAspectScale;
   float angle = atan(adjustedUv.y, adjustedUv.x);
   float radius = length(adjustedUv);
   float tunnel = fract(radius * 10.0 - uTime * uAnimationSpeed);
   float radialLines = drawLine(angle / (2.0 * PI) * uRadialLinesCount, uLinesThickness);
   float slices = drawLine(radius * 5.0 - uTime * uAnimationSpeed, uLinesThickness);
-  float grid = max(radialLines, slices);
+  float lines = max(radialLines, slices);
 
   float leftBorder = step(uBordersMargin, vUv.x) - step(uBordersMargin + uBordersThickness, vUv.x);
   float rightBorder = step(1.0 - uBordersMargin, vUv.x) - step(1.0 - uBordersMargin + uBordersThickness, vUv.x);
@@ -42,7 +41,7 @@ void main() {
   float crossYLine = min(step(-uCrossThickness, adjustedUv.y) - step(uCrossThickness, adjustedUv.y), step(-uCrossSize, adjustedUv.x) - step(uCrossSize, adjustedUv.x));
   float _cross = max(crossXLine, crossYLine);
 
-  vec3 col = mix(uBackgroundColor, uLinesColor, grid);
+  vec3 col = mix(uBackgroundColor, uLinesColor, lines);
   col = mix(col, uBordersColor, borders);
   col = mix(col, uCrossColor, _cross);
 

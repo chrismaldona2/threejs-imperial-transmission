@@ -13,6 +13,8 @@ uniform float uGridLinesThickness;
 uniform vec3 uRingColor;
 uniform float uRingThickness;
 uniform float uRingAspectScale;
+uniform int uRingCount; // Number of rings
+uniform vec3 uRings[5]; // Array of vec3: (x, y) = position, z = radius
 
 uniform int uTargetCount;
 uniform vec3 uTargetColor;
@@ -34,23 +36,20 @@ void main() {
   verticalLines *= smoothstep(1.0, uGridLinesThickness, verticalLines);
   float grid = clamp((verticalLines + horizontalLines) * uGridIntensity, 0.0, 1.0);
 
-  vec2 outerRingPos = vUv - 0.5;
-  outerRingPos.x *= uRingAspectScale;
-  float outerRingDist = length(outerRingPos);
-  float outerRingRadius = 0.48;
-  float outerRing = abs(outerRingDist - outerRingRadius);
-  outerRing = smoothstep(uRingThickness, 0.0, outerRing);
-
-  vec2 innerRingPos = vUv;
-  innerRingPos.y -= 0.5;
-  innerRingPos.x -= 0.25;
-  innerRingPos.x *= uRingAspectScale;
-  float innerRingDist = length(innerRingPos);
-  float innerRingRadius = 0.2;
-  float innerRing = abs(innerRingDist - innerRingRadius);
-  innerRing = smoothstep(uRingThickness, 0.0, innerRing);
-
-  float rings = outerRing + innerRing;
+  float rings = 0.0;
+  if (uRingCount > 0) {
+    for (int i = 0; i < uRingCount; i++) {
+      vec2 ringPos = uRings[i].xy; // Extract position (x, y)
+      float ringRadius = uRings[i].z; // Extract radius (z)
+      vec2 adjustedUv = vUv;
+      adjustedUv.x *= uRingAspectScale;
+      ringPos.x *= uRingAspectScale;
+      float ringDist = length(adjustedUv - ringPos);
+      float ring = abs(ringDist - ringRadius);
+      ring = smoothstep(uRingThickness, 0.0, ring);
+      rings += ring;
+    }
+  }
 
   vec2 adjustedUv = vUv - 0.5;
   adjustedUv.x *= uLinesAspectScale;

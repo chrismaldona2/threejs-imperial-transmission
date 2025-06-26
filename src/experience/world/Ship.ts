@@ -1,6 +1,5 @@
 import * as THREE from "three";
 import Experience from "../Experience";
-import type GUI from "lil-gui";
 import type { GLTF } from "three/examples/jsm/Addons.js";
 import HologramMaterial from "./HologramMaterial";
 import ScreenPatternMaterial from "./ScreenPatternMaterial";
@@ -73,7 +72,7 @@ class Ship {
     };
   };
 
-  private tweaksFolder?: GUI;
+  private tweaks?: typeof this.debug;
 
   constructor() {
     this.group.name = "ShipGroup";
@@ -119,7 +118,7 @@ class Ship {
       left: new ScreenPatternMaterial({
         variant: "radar",
         uniforms: {
-          uAspectScale: 2.777,
+          uTargetAspectScale: 2.777,
         },
       }),
       right: {
@@ -136,7 +135,7 @@ class Ship {
             uGridColumns: 15,
             uGridRows: 5,
             uTargetRadius: 0.1,
-            uAspectScale: 3.888,
+            uTargetAspectScale: 3.888,
           },
         }),
       },
@@ -144,7 +143,7 @@ class Ship {
         "00": new ScreenPatternMaterial({
           variant: "radar",
           uniforms: {
-            uAspectScale: 3.333,
+            uTargetAspectScale: 3.333,
           },
         }),
         "01": new ScreenPatternMaterial({ variant: "wave" }),
@@ -219,7 +218,7 @@ class Ship {
       { name: "right_board_screen003", material: "targetingPattern" },
       { name: "corner_board_screen", material: "radarPatternVariant2" },
       { name: "corner_board_screen001", material: "wavePatternVariant2" },
-      { name: "corner_board_screen002", material: "wavePatternVariant2" },
+      { name: "corner_board_screen002", material: "wavePatternVariant3" },
     ];
 
     meshMaterialsMap.forEach((record) => {
@@ -241,11 +240,37 @@ class Ship {
   }
 
   private setupTweaks() {
-    this.tweaksFolder = this.debug.addFolder("Ship");
-    this.tweaksFolder.open();
+    this.tweaks = this.debug.addFolder("Ship");
+    this.tweaks.open();
 
-    const hologramFolder = this.tweaksFolder.addFolder("Hologram");
-    this.hologramMaterial.setupTweaks(hologramFolder);
+    const hologram = this.tweaks.addFolder("Hologram");
+    this.hologramMaterial.setupTweaks(hologram);
+
+    const screens = this.tweaks.addFolder("Screens");
+    screens.open();
+
+    const leftScreens = screens.addFolder("Left");
+    const rightScreens = screens.addFolder("Right");
+    const cornerScreens = screens.addFolder("Corner");
+
+    const radar_left = leftScreens.addFolder("Radar");
+    this.screenPatternsMaterials.left.setupTweaks(radar_left);
+
+    const orbital_right = rightScreens.addFolder("Orbital");
+    const wave_right = rightScreens.addFolder("Wave");
+    const targeting_right = rightScreens.addFolder("Targeting");
+    const radar_right = rightScreens.addFolder("Radar");
+    this.screenPatternsMaterials.right["00"].setupTweaks(orbital_right);
+    this.screenPatternsMaterials.right["01"].setupTweaks(wave_right);
+    this.screenPatternsMaterials.right["02"].setupTweaks(targeting_right);
+    this.screenPatternsMaterials.right["03"].setupTweaks(radar_right);
+
+    const radar_corner = cornerScreens.addFolder("Radar");
+    const wave_corner_01 = cornerScreens.addFolder("Wave 01");
+    const wave_corner_02 = cornerScreens.addFolder("Wave 02");
+    this.screenPatternsMaterials.corner["00"].setupTweaks(radar_corner);
+    this.screenPatternsMaterials.corner["01"].setupTweaks(wave_corner_01);
+    this.screenPatternsMaterials.corner["02"].setupTweaks(wave_corner_02);
   }
 
   update() {
@@ -262,7 +287,7 @@ class Ship {
   }
 
   dispose() {
-    this.tweaksFolder?.destroy();
+    this.tweaks?.destroy();
   }
 }
 
