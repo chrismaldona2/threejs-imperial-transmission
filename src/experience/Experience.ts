@@ -7,6 +7,7 @@ import Renderer from "./Renderer";
 import World from "./world/World";
 import Resources from "./utils/Resources";
 import Debug from "./utils/Debug";
+import PostProccessing from "./utils/PostProccessing";
 
 class Experience {
   private static instance: Experience;
@@ -16,6 +17,7 @@ class Experience {
   scene: THREE.Scene;
   camera: Camera;
   renderer: Renderer;
+  postprocessing: PostProccessing;
   resources: Resources;
   world: World;
   debug: Debug;
@@ -30,6 +32,7 @@ class Experience {
     this.scene = new THREE.Scene();
     this.camera = new Camera();
     this.renderer = new Renderer();
+    this.postprocessing = new PostProccessing();
     this.resources = new Resources();
     this.world = new World();
 
@@ -40,12 +43,14 @@ class Experience {
   update() {
     this.world.update();
     this.camera.update();
-    this.renderer.update();
+    this.postprocessing.update();
+    // this.renderer.update(); // → Renders the scene. Commented in order to use the postprocessing render instead
   }
 
   resize() {
     this.camera.resize();
     this.renderer.resize();
+    this.postprocessing.resize();
   }
 
   dispose() {
