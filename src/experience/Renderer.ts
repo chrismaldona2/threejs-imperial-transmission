@@ -19,10 +19,11 @@ class Renderer {
     });
     this.instance.setSize(this.sizes.width, this.sizes.height);
     this.instance.setPixelRatio(this.sizes.pixelRatio);
-    this.setupTweaks();
+    this.instance.outputColorSpace = THREE.SRGBColorSpace;
   }
 
-  private setupTweaks() {
+  setupTweaks() {
+    /* ↓ THIS TWEAKS WON'T WORK IF POSTPROCESSING IS ENABLED */
     this.tweaks = this.debug.addFolder("Renderer");
 
     this.tweaks

@@ -10,6 +10,7 @@ uniform float uFresnelSharpness;
 uniform float uFresnelBoost;
 uniform float uFresnelFalloffStart;
 
+
 void main() {
   vec3 normal = normalize(vNormal);
   if (!gl_FrontFacing) normal *= -1.0;
