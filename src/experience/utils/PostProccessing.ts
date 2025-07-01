@@ -14,6 +14,7 @@ class PostProccessing {
   private readonly sizes = this.experience.sizes;
   private readonly camera = this.experience.camera.instance;
   private readonly scene = this.experience.scene;
+  private readonly debug = this.experience.debug.instance;
 
   private renderTarget: THREE.WebGLRenderTarget;
   private composer: EffectComposer;
@@ -41,9 +42,9 @@ class PostProccessing {
 
     this.bloomPass = new UnrealBloomPass(
       new THREE.Vector2(this.sizes.width, this.sizes.height),
-      0.2,
-      1,
-      0.8
+      0.18,
+      1.12,
+      0.75
     );
     this.composer.addPass(this.bloomPass);
 
@@ -115,6 +116,31 @@ class PostProccessing {
       this.smaaPass = new SMAAPass();
       this.composer.addPass(this.smaaPass);
     }
+
+    this.setupTweaks();
+  }
+
+  setupTweaks() {
+    const folder = this.debug.addFolder("Post Processing");
+    folder.add(this.bloomPass, "enabled").name("Bloom Enabled");
+    folder
+      .add(this.bloomPass, "strength")
+      .min(0)
+      .max(2)
+      .step(0.01)
+      .name("Bloom Strength");
+    folder
+      .add(this.bloomPass, "radius")
+      .min(0)
+      .max(4)
+      .step(0.01)
+      .name("Bloom Radius");
+    folder
+      .add(this.bloomPass, "threshold")
+      .min(0)
+      .max(2)
+      .step(0.01)
+      .name("Bloom Threshold");
   }
 
   update() {
