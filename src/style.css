@@ -28,5 +28,13 @@ body {
 }
 
 .lil-gui {
-  --width: 450px;
+  visibility: hidden;
+
+  --width: min(450px, 95%);
+}
+
+@media (min-width: 700px) {
+  .lil-gui {
+    visibility: visible;
+  }
 }

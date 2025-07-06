@@ -5,11 +5,11 @@ import radarFragment from "../../shaders/screenPattern/radarFragment.glsl";
 import waveFragment from "../../shaders/screenPattern/waveFragment.glsl";
 import orbitalFragments from "../../shaders/screenPattern/orbitalsFragment.glsl";
 import targetingFragment from "../../shaders/screenPattern/targetingFragment.glsl";
+import type GUI from "lil-gui";
 
 class ScreenPatternMaterial {
   private readonly experience = Experience.getInstance();
   private readonly timer = this.experience.timer;
-  private readonly debug = this.experience.debug.instance;
 
   readonly material: THREE.ShaderMaterial;
   private readonly variant: Options["variant"];
@@ -159,7 +159,7 @@ class ScreenPatternMaterial {
     this.material.dispose();
   }
 
-  setupTweaks(gui: typeof this.debug) {
+  setupTweaks(gui: GUI) {
     switch (this.variant) {
       case "radar": {
         this.setupCommonTweaks(gui, true, true, true);
@@ -184,7 +184,7 @@ class ScreenPatternMaterial {
     }
   }
 
-  private setupWaveSpecificTweaks(gui: typeof this.debug): void {
+  private setupWaveSpecificTweaks(gui: GUI) {
     const uniforms = this.material.uniforms;
     const colors = {
       wave: uniforms.uWaveColor.value.getHex(),
@@ -223,7 +223,7 @@ class ScreenPatternMaterial {
       .step(0.001);
   }
 
-  private setupOrbitalSpecificTweaks(gui: typeof this.debug): void {
+  private setupOrbitalSpecificTweaks(gui: GUI) {
     const uniforms = this.material.uniforms;
     const colors = {
       ring: uniforms.uRingColor.value.getHex(),
@@ -283,7 +283,7 @@ class ScreenPatternMaterial {
       .step(0.001);
   }
 
-  private setupTargetingSpecificTweaks(gui: typeof this.debug): void {
+  private setupTargetingSpecificTweaks(gui: GUI) {
     const uniforms = this.material.uniforms;
     const colors = {
       lines: uniforms.uLinesColor.value.getHex(),
@@ -365,7 +365,7 @@ class ScreenPatternMaterial {
   }
 
   private setupCommonTweaks(
-    gui: typeof this.debug,
+    gui: GUI,
     hasGrid?: boolean,
     hasSweepLine?: boolean,
     hasTargets?: boolean,
@@ -404,13 +404,13 @@ class ScreenPatternMaterial {
         .add(uniforms.uGridColumns, "value")
         .name("Grid Columns")
         .min(0)
-        .max(30)
+        .max(50)
         .step(1);
       folder
         .add(uniforms.uGridRows, "value")
         .name("Grid Rows")
         .min(0)
-        .max(30)
+        .max(50)
         .step(1);
       folder
         .add(uniforms.uGridLinesThickness, "value")
@@ -502,7 +502,7 @@ class ScreenPatternMaterial {
         .add(uniforms.uTargetAspectScale, "value")
         .name("Target Aspect Scale")
         .min(0)
-        .max(5)
+        .max(8)
         .step(0.001);
     }
   }
@@ -603,533 +603,3 @@ type Options =
   | { variant: "wave"; uniforms?: Partial<WaveUniformValues> }
   | { variant: "orbitals"; uniforms?: Partial<OrbitalsUniformValues> }
   | { variant: "targeting"; uniforms?: Partial<TargetingUniformValues> };
-
-// setupTweaks(gui: typeof this.debug) {
-//   switch (this.variant) {
-//     case "radar": {
-//       const debugObj = {
-//         backgroundColor:
-//           this.material.uniforms.uBackgroundColor.value.getHex(),
-//         gridColor: this.material.uniforms.uGridColor.value.getHex(),
-//         sweepLineColor: this.material.uniforms.uSweepColor.value.getHex(),
-//         targetColor: this.material.uniforms.uTargetColor.value.getHex(),
-//       };
-
-//       /* BACKGROUND COLOR TWEAKS */
-//       gui
-//         .addColor(debugObj, "backgroundColor")
-//         .name("Background Color")
-//         .onChange(() => {
-//           this.material.uniforms.uBackgroundColor.value.set(
-//             debugObj.backgroundColor
-//           );
-//         });
-
-//       /* GRID TWEAKS */
-//       const gridFolder = gui.addFolder("Grid");
-//       gridFolder
-//         .addColor(debugObj, "gridColor")
-//         .name("Grid Color")
-//         .onChange(() => {
-//           this.material.uniforms.uGridColor.value.set(debugObj.gridColor);
-//         });
-//       gridFolder
-//         .add(this.material.uniforms.uGridIntensity, "value")
-//         .name("Grid Intensity")
-//         .min(0)
-//         .max(2)
-//         .step(0.001);
-//       gridFolder
-//         .add(this.material.uniforms.uGridColumns, "value")
-//         .name("Grid Columns")
-//         .step(1)
-//         .min(0)
-//         .max(30);
-//       gridFolder
-//         .add(this.material.uniforms.uGridRows, "value")
-//         .name("Grid Rows")
-//         .step(1)
-//         .min(0)
-//         .max(30);
-//       gridFolder
-//         .add(this.material.uniforms.uGridLinesThickness, "value")
-//         .name("Grid Lines Thickness")
-//         .min(0)
-//         .max(2)
-//         .step(0.001);
-//       const displacementFolder = gridFolder.addFolder("Grid Displacement");
-//       displacementFolder
-//         .add(this.material.uniforms.uGridDisplacement.value, "x")
-//         .min(-1)
-//         .max(1)
-//         .step(0.001);
-//       displacementFolder
-//         .add(this.material.uniforms.uGridDisplacement.value, "y")
-//         .min(-1)
-//         .max(1)
-//         .step(0.001);
-
-//       /* SWEEP LINE TWEAKS */
-//       const sweepLineFolder = gui.addFolder("Sweep Line");
-//       sweepLineFolder
-//         .add(debugObj, "sweepLineColor")
-//         .name("Sweep Line Color")
-//         .onChange(() => {
-//           this.material.uniforms.uSweepColor.value.set(
-//             debugObj.sweepLineColor
-//           );
-//         });
-//       sweepLineFolder
-//         .add(this.material.uniforms.uSweepThickness, "value")
-//         .name("Sweep Line Thickness")
-//         .min(0)
-//         .max(2)
-//         .step(0.0001);
-//       sweepLineFolder
-//         .add(this.material.uniforms.uSweepFrequency, "value")
-//         .name("Sweep Frequency")
-//         .min(0)
-//         .max(10)
-//         .step(0.001);
-//       sweepLineFolder
-//         .add(this.material.uniforms.uSweepSpeed, "value")
-//         .name("Sweep Speed")
-//         .min(0)
-//         .max(3)
-//         .step(0.001);
-
-//       /* TARGETS TWEAKS */
-//       const targetsFolder = gui.addFolder("Targets");
-//       targetsFolder
-//         .addColor(debugObj, "targetColor")
-//         .name("Target Color")
-//         .onChange(() => {
-//           this.material.uniforms.uTargetColor.value.set(debugObj.targetColor);
-//         });
-//       targetsFolder
-//         .add(this.material.uniforms.uTargetCount, "value")
-//         .name("Targets Count")
-//         .min(0)
-//         .max(10)
-//         .step(1);
-//       const targetsPosFolder = targetsFolder.addFolder("Target Positions");
-//       this.material.uniforms.uTargetPositions.value.forEach(
-//         (target: THREE.Vector2, idx: number) => {
-//           const targetFolder = targetsPosFolder.addFolder(`Target ${idx}`);
-//           targetFolder.add(target, "x").min(0).max(1).step(0.001);
-//           targetFolder.add(target, "y").min(0).max(1).step(0.001);
-//         }
-//       );
-//       targetsFolder
-//         .add(this.material.uniforms.uTargetRadius, "value")
-//         .name("Target Radius")
-//         .min(0)
-//         .max(1)
-//         .step(0.0001);
-//       targetsFolder
-//         .add(this.material.uniforms.uMinTargetRadiusPercentage, "value")
-//         .name("Min Target Radius %")
-//         .min(0)
-//         .max(1)
-//         .step(0.001);
-//       targetsFolder
-//         .add(this.material.uniforms.uTargetBlinkSpeed, "value")
-//         .name("Target Animation Speed")
-//         .min(0)
-//         .max(8)
-//         .step(0.01);
-//       targetsFolder
-//         .add(this.material.uniforms.uTargetAspectScale, "value")
-//         .name("Target Aspect Scale")
-//         .min(0)
-//         .max(5)
-//         .step(0.001);
-//       break;
-//     }
-//     case "wave": {
-//       const debugObj = {
-//         backgroundColor:
-//           this.material.uniforms.uBackgroundColor.value.getHex(),
-//         gridColor: this.material.uniforms.uGridColor.value.getHex(),
-//         sweepLineColor: this.material.uniforms.uSweepColor.value.getHex(),
-//         waveColor: this.material.uniforms.uWaveColor.value.getHex(),
-//       };
-
-//       /* BACKGROUND COLOR TWEAK */
-//       gui
-//         .addColor(debugObj, "backgroundColor")
-//         .name("Background Color")
-//         .onChange(() => {
-//           this.material.uniforms.uBackgroundColor.value.set(
-//             debugObj.backgroundColor
-//           );
-//         });
-
-//       /* GRID TWEAKS */
-//       const gridFolder = gui.addFolder("Grid");
-//       gridFolder
-//         .addColor(debugObj, "gridColor")
-//         .name("Grid Color")
-//         .onChange(() => {
-//           this.material.uniforms.uGridColor.value.set(debugObj.gridColor);
-//         });
-//       gridFolder
-//         .add(this.material.uniforms.uGridIntensity, "value")
-//         .name("Grid Intensity")
-//         .min(0)
-//         .max(2)
-//         .step(0.001);
-//       gridFolder
-//         .add(this.material.uniforms.uGridColumns, "value")
-//         .name("Grid Columns")
-//         .step(1)
-//         .min(0)
-//         .max(30);
-//       gridFolder
-//         .add(this.material.uniforms.uGridRows, "value")
-//         .name("Grid Rows")
-//         .step(1)
-//         .min(0)
-//         .max(30);
-//       gridFolder
-//         .add(this.material.uniforms.uGridLinesThickness, "value")
-//         .name("Grid Lines Thickness")
-//         .min(0)
-//         .max(2)
-//         .step(0.001);
-//       const displacementFolder = gridFolder.addFolder("Grid Displacement");
-//       displacementFolder
-//         .add(this.material.uniforms.uGridDisplacement.value, "x")
-//         .min(-1)
-//         .max(1)
-//         .step(0.001);
-//       displacementFolder
-//         .add(this.material.uniforms.uGridDisplacement.value, "y")
-//         .min(-1)
-//         .max(1)
-//         .step(0.001);
-
-//       /* SWEEP LINE TWEAKS */
-//       const sweepLineFolder = gui.addFolder("Sweep Line");
-//       sweepLineFolder
-//         .add(debugObj, "sweepLineColor")
-//         .name("Sweep Line Color")
-//         .onChange(() => {
-//           this.material.uniforms.uSweepColor.value.set(
-//             debugObj.sweepLineColor
-//           );
-//         });
-//       sweepLineFolder
-//         .add(this.material.uniforms.uSweepThickness, "value")
-//         .name("Sweep Line Thickness")
-//         .min(0)
-//         .max(2)
-//         .step(0.0001);
-//       sweepLineFolder
-//         .add(this.material.uniforms.uSweepFrequency, "value")
-//         .name("Sweep Frequency")
-//         .min(0)
-//         .max(10)
-//         .step(0.001);
-//       sweepLineFolder
-//         .add(this.material.uniforms.uSweepSpeed, "value")
-//         .name("Sweep Speed")
-//         .min(0)
-//         .max(3)
-//         .step(0.001);
-
-//       /* WAVE TWEAKS */
-//       const waveFolder = gui.addFolder("Wave");
-//       waveFolder
-//         .addColor(debugObj, "waveColor")
-//         .name("Wave Color")
-//         .onChange(() => {
-//           this.material.uniforms.uWaveColor.value.set(debugObj.waveColor);
-//         });
-//       waveFolder
-//         .add(this.material.uniforms.uWaveAmplitude, "value")
-//         .name("Wave Amplitude")
-//         .min(0)
-//         .max(1.5)
-//         .step(0.001);
-//       waveFolder
-//         .add(this.material.uniforms.uWaveFrequency, "value")
-//         .name("Wave Frequency")
-//         .min(0)
-//         .max(20)
-//         .step(0.001);
-//       waveFolder
-//         .add(this.material.uniforms.uWaveThickness, "value")
-//         .name("Wave Thickness")
-//         .min(0)
-//         .max(1)
-//         .step(0.0001);
-//       break;
-//     }
-//     case "orbitals": {
-//       const debugObj = {
-//         backgroundColor:
-//           this.material.uniforms.uBackgroundColor.value.getHex(),
-//         gridColor: this.material.uniforms.uGridColor.value.getHex(),
-//         ringColor: this.material.uniforms.uRingColor.value.getHex(),
-//         targetColor: this.material.uniforms.uTargetColor.value.getHex(),
-//       };
-
-//       /* BACKGROUND COLOR TWEAK */
-//       gui
-//         .addColor(debugObj, "backgroundColor")
-//         .name("Background Color")
-//         .onChange(() => {
-//           this.material.uniforms.uBackgroundColor.value.set(
-//             debugObj.backgroundColor
-//           );
-//         });
-
-//       /* GRID TWEAKS */
-//       const gridFolder = gui.addFolder("Grid");
-//       gridFolder
-//         .addColor(debugObj, "gridColor")
-//         .name("Grid Color")
-//         .onChange(() => {
-//           this.material.uniforms.uGridColor.value.set(debugObj.gridColor);
-//         });
-//       gridFolder
-//         .add(this.material.uniforms.uGridIntensity, "value")
-//         .name("Grid Intensity")
-//         .min(0)
-//         .max(2)
-//         .step(0.001);
-//       gridFolder
-//         .add(this.material.uniforms.uGridColumns, "value")
-//         .name("Grid Columns")
-//         .step(1)
-//         .min(0)
-//         .max(30);
-//       gridFolder
-//         .add(this.material.uniforms.uGridRows, "value")
-//         .name("Grid Rows")
-//         .step(1)
-//         .min(0)
-//         .max(30);
-//       gridFolder
-//         .add(this.material.uniforms.uGridLinesThickness, "value")
-//         .name("Grid Lines Thickness")
-//         .min(0)
-//         .max(2)
-//         .step(0.001);
-//       const displacementFolder = gridFolder.addFolder("Grid Displacement");
-//       displacementFolder
-//         .add(this.material.uniforms.uGridDisplacement.value, "x")
-//         .min(-1)
-//         .max(1)
-//         .step(0.001);
-//       displacementFolder
-//         .add(this.material.uniforms.uGridDisplacement.value, "y")
-//         .min(-1)
-//         .max(1)
-//         .step(0.001);
-
-//       /* RINGS TWEAKS */
-//       const ringsFolder = gui.addFolder("Rings");
-//       ringsFolder
-//         .addColor(debugObj, "ringColor")
-//         .name("Ring Color")
-//         .onChange(() => {
-//           this.material.uniforms.uRingColor.value.set(debugObj.ringColor);
-//         });
-//       ringsFolder
-//         .add(this.material.uniforms.uRingCount, "value")
-//         .name("Rings Count")
-//         .min(0)
-//         .max(5)
-//         .step(1);
-//       const ringsConfFolder = ringsFolder.addFolder("Rings");
-//       this.material.uniforms.uRings.value.forEach(
-//         (ring: THREE.Vector3, idx: number) => {
-//           const ringFolder = ringsConfFolder.addFolder(`Ring ${idx}`);
-//           ringFolder.add(ring, "x").min(0).max(1).step(0.001);
-//           ringFolder.add(ring, "y").min(0).max(1).step(0.001);
-//           ringFolder.add(ring, "z").name("Radius").min(0).max(1).step(0.001);
-//         }
-//       );
-//       ringsFolder
-//         .add(this.material.uniforms.uRingThickness, "value")
-//         .name("Ring Thickness")
-//         .min(0)
-//         .max(1)
-//         .step(0.001);
-//       ringsFolder
-//         .add(this.material.uniforms.uRingAspectScale, "value")
-//         .name("Ring Aspect Scale")
-//         .min(0)
-//         .max(5)
-//         .step(0.001);
-
-//       /* TARGETS TWEAKS */
-//       const targetsFolder = gui.addFolder("Targets");
-//       targetsFolder
-//         .addColor(debugObj, "targetColor")
-//         .name("Target Color")
-//         .onChange(() => {
-//           this.material.uniforms.uTargetColor.value.set(debugObj.targetColor);
-//         });
-//       targetsFolder
-//         .add(this.material.uniforms.uTargetCount, "value")
-//         .name("Targets Count")
-//         .min(0)
-//         .max(10)
-//         .step(1);
-//       const targetsPosFolder = targetsFolder.addFolder("Target Positions");
-//       this.material.uniforms.uTargetPositions.value.forEach(
-//         (target: THREE.Vector2, idx: number) => {
-//           const targetFolder = targetsPosFolder.addFolder(`Target ${idx}`);
-//           targetFolder.add(target, "x").min(0).max(1).step(0.001);
-//           targetFolder.add(target, "y").min(0).max(1).step(0.001);
-//         }
-//       );
-//       targetsFolder
-//         .add(this.material.uniforms.uTargetRadius, "value")
-//         .name("Target Radius")
-//         .min(0)
-//         .max(1)
-//         .step(0.0001);
-//       targetsFolder
-//         .add(this.material.uniforms.uMinTargetRadiusPercentage, "value")
-//         .name("Min Target Radius %")
-//         .min(0)
-//         .max(1)
-//         .step(0.001);
-//       targetsFolder
-//         .add(this.material.uniforms.uTargetBlinkSpeed, "value")
-//         .name("Target Animation Speed")
-//         .min(0)
-//         .max(8)
-//         .step(0.01);
-//       targetsFolder
-//         .add(this.material.uniforms.uTargetAspectScale, "value")
-//         .name("Target Aspect Scale")
-//         .min(0)
-//         .max(5)
-//         .step(0.001);
-
-//       /* LINES TWEAKS */
-//       const linesFolder = gui.addFolder("Lines");
-//       linesFolder
-//         .add(this.material.uniforms.uLinesThickness, "value")
-//         .name("Lines Thickness")
-//         .min(0)
-//         .max(2)
-//         .step(0.0001);
-//       linesFolder
-//         .add(this.material.uniforms.uLinesAspectScale, "value")
-//         .name("Lines Aspect Scale")
-//         .min(0)
-//         .max(5)
-//         .step(0.001);
-//       linesFolder
-//         .add(this.material.uniforms.uLineAnimationSpeed, "value")
-//         .name("Line Animation Speed")
-//         .min(0)
-//         .max(3)
-//         .step(0.001);
-//       break;
-//     }
-//     case "targeting": {
-//       const debugObj = {
-//         backgroundColor:
-//           this.material.uniforms.uBackgroundColor.value.getHex(),
-//         linesColor: this.material.uniforms.uLinesColor.value.getHex(),
-//         bordersColor: this.material.uniforms.uBordersColor.value.getHex(),
-//         crossColor: this.material.uniforms.uCrossColor.value.getHex(),
-//       };
-
-//       /* BACKGROUND COLOR TWEAK */
-//       gui
-//         .addColor(debugObj, "backgroundColor")
-//         .name("Background Color")
-//         .onChange(() => {
-//           this.material.uniforms.uBackgroundColor.value.set(
-//             debugObj.backgroundColor
-//           );
-//         });
-
-//       /* LINES TWEAKS */
-//       const linesFolder = gui.addFolder("Lines");
-//       linesFolder
-//         .addColor(debugObj, "linesColor")
-//         .name("Lines Color")
-//         .onChange(() => {
-//           this.material.uniforms.uLinesColor.value.set(debugObj.linesColor);
-//         });
-//       linesFolder
-//         .add(this.material.uniforms.uAnimationSpeed, "value")
-//         .name("Animation Speed")
-//         .min(0)
-//         .max(4)
-//         .step(0.001);
-//       linesFolder
-//         .add(this.material.uniforms.uLinesThickness, "value")
-//         .name("Lines Thickness")
-//         .min(0)
-//         .max(2)
-//         .step(0.001);
-//       linesFolder
-//         .add(this.material.uniforms.uRadialLinesCount, "value")
-//         .name("Radial Lines Count")
-//         .min(0)
-//         .max(30)
-//         .step(1);
-//       linesFolder
-//         .add(this.material.uniforms.uLinesAspectScale, "value")
-//         .name("Lines Aspect Scale")
-//         .min(0)
-//         .max(5)
-//         .step(0.001);
-
-//       /* BORDERS TWEAKS */
-//       const bordersFolder = gui.addFolder("Borders");
-//       bordersFolder
-//         .addColor(debugObj, "bordersColor")
-//         .name("Borders Color")
-//         .onChange(() => {
-//           this.material.uniforms.uBordersColor.value.set(
-//             debugObj.bordersColor
-//           );
-//         });
-//       bordersFolder
-//         .add(this.material.uniforms.uBordersThickness, "value")
-//         .name("Borders Thickness")
-//         .min(0)
-//         .max(1.5)
-//         .step(0.0001);
-//       bordersFolder
-//         .add(this.material.uniforms.uBordersMargin, "value")
-//         .name("Borders Margin")
-//         .min(0)
-//         .max(1)
-//         .step(0.0001);
-
-//       /* MIDDLE CROSS TWEAKS */
-//       const crossFolder = gui.addFolder("Cross");
-//       crossFolder
-//         .addColor(debugObj, "crossColor")
-//         .name("Cross Color")
-//         .onChange(() => {
-//           this.material.uniforms.uCrossColor.value.set(debugObj.crossColor);
-//         });
-//       crossFolder
-//         .add(this.material.uniforms.uCrossThickness, "value")
-//         .name("Cross Thickness")
-//         .min(0)
-//         .max(1)
-//         .step(0.0001);
-//       crossFolder
-//         .add(this.material.uniforms.uCrossSize, "value")
-//         .name("Cross Size")
-//         .min(0)
-//         .max(1.5)
-//         .step(0.0001);
-//       break;
-//     }
-//   }
-// }

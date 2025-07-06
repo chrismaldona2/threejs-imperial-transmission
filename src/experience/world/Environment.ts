@@ -18,7 +18,7 @@ class Environment {
   private tweaks?: typeof this.debug;
 
   constructor() {
-    this.ambientLight = new THREE.AmbientLight(0x3c5e8b, 0.8);
+    this.ambientLight = new THREE.AmbientLight(0x3e536f, 0.6);
 
     this.environmentMap =
       this.resources.getAsset<THREE.CubeTexture>("space_cubemap");

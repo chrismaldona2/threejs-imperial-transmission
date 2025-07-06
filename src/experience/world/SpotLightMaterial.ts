@@ -2,12 +2,12 @@ import Experience from "../Experience";
 import * as THREE from "three";
 import vertexShader from "../../shaders/lightspot/vertex.glsl";
 import fragmentShader from "../../shaders/lightspot/fragment.glsl";
+import type GUI from "lil-gui";
 
 class SpotLightMaterial {
   private readonly experience = Experience.getInstance();
   private readonly resources = this.experience.resources;
   private readonly timer = this.experience.timer;
-  private readonly debug = this.experience.debug.instance;
 
   material: THREE.ShaderMaterial;
 
@@ -41,7 +41,7 @@ class SpotLightMaterial {
     });
   }
 
-  setupTweaks(gui: typeof this.debug) {
+  setupTweaks(gui: GUI) {
     const debugObj = {
       colorTop: this.material.uniforms.uColorTop.value.getHex(),
       colorBottom: this.material.uniforms.uColorBottom.value.getHex(),

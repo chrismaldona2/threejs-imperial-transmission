@@ -4,6 +4,7 @@ import type { GLTF } from "three/examples/jsm/Addons.js";
 import HologramMaterial from "./HologramMaterial";
 import ScreenPatternMaterial from "./ScreenPatternMaterial";
 import SpotLightMaterial from "./SpotLightMaterial";
+import GlassMaterial from "./GlassMaterial";
 
 const materialNames = [
   "bake01",
@@ -54,7 +55,8 @@ class Ship {
   private textures!: Record<TextureNames, THREE.Texture>;
   private materials!: Record<MaterialNames, THREE.Material>;
 
-  /* CUSTOM SHADER MATERIALS */
+  /* CUSTOM MATERIALS */
+  private glassMaterial!: GlassMaterial;
   private hologramMaterial!: HologramMaterial;
   private spotLightMaterial!: SpotLightMaterial;
   private screenPatternsMaterials!: {
@@ -114,6 +116,8 @@ class Ship {
     /* CUSTOM MATERIALS INITIALIZATION  */
     this.hologramMaterial = new HologramMaterial();
     this.spotLightMaterial = new SpotLightMaterial();
+
+    this.glassMaterial = new GlassMaterial();
     this.screenPatternsMaterials = {
       left: new ScreenPatternMaterial({
         variant: "radar",
@@ -124,7 +128,14 @@ class Ship {
       right: {
         "00": new ScreenPatternMaterial({ variant: "orbitals" }),
         "01": new ScreenPatternMaterial({ variant: "wave" }),
-        "02": new ScreenPatternMaterial({ variant: "targeting" }),
+        "02": new ScreenPatternMaterial({
+          variant: "targeting",
+          uniforms: {
+            uCrossColor: new THREE.Color(0xffc561),
+            uBordersColor: new THREE.Color(0xfcffd6),
+            uLinesColor: new THREE.Color(0xdae3ab),
+          },
+        }),
         "03": new ScreenPatternMaterial({
           variant: "radar",
           uniforms: {
@@ -143,11 +154,38 @@ class Ship {
         "00": new ScreenPatternMaterial({
           variant: "radar",
           uniforms: {
-            uTargetAspectScale: 3.333,
+            uTargetAspectScale: 6,
+            uGridColumns: 46,
+            uGridColor: new THREE.Color(0xafb3d9),
+            uGridIntensity: 0.76,
+            uTargetColor: new THREE.Color(0x326ac3),
+            uTargetRadius: 0.047,
+            uSweepColor: new THREE.Color(0x4173b4),
+            uSweepFrequency: 3.4,
+            uSweepSpeed: 0.3,
+            uSweepThickness: 0.025,
           },
         }),
-        "01": new ScreenPatternMaterial({ variant: "wave" }),
-        "02": new ScreenPatternMaterial({ variant: "wave" }),
+        "01": new ScreenPatternMaterial({
+          variant: "wave",
+          uniforms: {
+            uWaveColor: new THREE.Color(0xf640cb),
+            uGridColor: new THREE.Color(0x53ace1),
+            uSweepColor: new THREE.Color(0xffffff),
+          },
+        }),
+        "02": new ScreenPatternMaterial({
+          variant: "wave",
+          uniforms: {
+            uWaveColor: new THREE.Color(0xf640cb),
+            uGridColor: new THREE.Color(0x5ca0c7),
+            uSweepColor: new THREE.Color(0xffffff),
+            uWaveAmplitude: 0.175,
+            uWaveFrequency: 18.5,
+            uWaveThickness: 0.028,
+            uWaveSpeed: 0.13,
+          },
+        }),
       },
     };
 
@@ -160,17 +198,7 @@ class Ship {
       bake02: new THREE.MeshBasicMaterial({
         map: this.textures["baked_texture_part2"],
       }),
-      glass: new THREE.MeshPhongMaterial({
-        specular: 0xffffff,
-        transparent: true,
-        opacity: 0.1,
-        shininess: 50,
-        fog: false,
-        depthWrite: false,
-        refractionRatio: 0.5,
-        combine: THREE.MixOperation,
-        reflectivity: 0.38,
-      }),
+      glass: this.glassMaterial.material,
       gold: new THREE.MeshMatcapMaterial({
         matcap: this.textures["gold_matcap_texture"],
       }),
@@ -243,6 +271,9 @@ class Ship {
     this.tweaks = this.debug.addFolder("Ship");
     this.tweaks.open();
 
+    const glass = this.tweaks.addFolder("Glass");
+    this.glassMaterial.setupTweaks(glass);
+
     const hologram = this.tweaks.addFolder("Hologram");
     this.hologramMaterial.setupTweaks(hologram);
 
@@ -288,6 +319,7 @@ class Ship {
 
   dispose() {
     this.tweaks?.destroy();
+    this.glassMaterial.dispose();
   }
 }
 

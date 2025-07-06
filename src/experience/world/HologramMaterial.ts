@@ -2,6 +2,7 @@ import * as THREE from "three";
 import vertexShader from "../../shaders/hologram/vertex.glsl";
 import fragmentShader from "../../shaders/hologram/fragment.glsl";
 import Experience from "../Experience";
+import type GUI from "lil-gui";
 
 interface HologramMaterialOptions {
   color?: THREE.ColorRepresentation;
@@ -18,7 +19,6 @@ interface HologramMaterialOptions {
 class HologramMaterial {
   private readonly experience = Experience.getInstance();
   private readonly timer = this.experience.timer;
-  private readonly debug = this.experience.debug.instance;
 
   material: THREE.ShaderMaterial;
 
@@ -57,7 +57,7 @@ class HologramMaterial {
     });
   }
 
-  setupTweaks(gui: typeof this.debug) {
+  setupTweaks(gui: GUI) {
     const debugObj = {
       color: this.material.uniforms.uColor.value.getHex(),
     };
