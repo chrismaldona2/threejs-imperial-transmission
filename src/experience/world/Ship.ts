@@ -1,21 +1,21 @@
 import * as THREE from "three";
 import Experience from "../Experience";
 import type { GLTF } from "three/examples/jsm/Addons.js";
-import HologramMaterial from "./HologramMaterial";
 import ScreenPatternMaterial from "./ScreenPatternMaterial";
 import SpotLightMaterial from "./SpotLightMaterial";
 import GlassMaterial from "./GlassMaterial";
+import VaderHologram from "./VaderHologram";
 
 const materialNames = [
   "bake01",
   "bake02",
   "glass",
   "gold",
+  "blackScreen",
   "hologramLightSource",
   "redLights",
   "whiteLights",
   "roundedLights",
-  "hologram",
   "spotLight",
   "radarPattern",
   "radarPatternVariant",
@@ -31,6 +31,7 @@ const textureNames = [
   "baked_texture_part1",
   "baked_texture_part2",
   "gold_matcap_texture",
+  "black_screen_matcap_texture",
   "rounded_lights_texture",
 ] as const;
 
@@ -51,13 +52,13 @@ class Ship {
 
   private group = new THREE.Group();
   private shipModel!: THREE.Object3D;
-  private vaderModel!: THREE.Object3D;
   private textures!: Record<TextureNames, THREE.Texture>;
   private materials!: Record<MaterialNames, THREE.Material>;
 
+  private darthVader!: VaderHologram;
+
   /* CUSTOM MATERIALS */
   private glassMaterial!: GlassMaterial;
-  private hologramMaterial!: HologramMaterial;
   private spotLightMaterial!: SpotLightMaterial;
   private screenPatternsMaterials!: {
     left: ScreenPatternMaterial;
@@ -93,12 +94,9 @@ class Ship {
     this.shipModel.name = "ShipModel";
 
     /* DARTH VADER */
-    const vaderGltf = this.resources.getAsset<GLTF>("darth_vader_model");
-    this.vaderModel = vaderGltf.scene;
-    this.vaderModel.position.y -= 0.2;
-    this.vaderModel.name = "VaderModel";
+    this.darthVader = new VaderHologram();
 
-    this.group.add(this.shipModel, this.vaderModel);
+    this.group.add(this.shipModel, this.darthVader.currentMesh);
   }
 
   private setupTextures() {
@@ -114,7 +112,6 @@ class Ship {
 
   private createMaterials() {
     /* CUSTOM MATERIALS INITIALIZATION  */
-    this.hologramMaterial = new HologramMaterial();
     this.spotLightMaterial = new SpotLightMaterial();
 
     this.glassMaterial = new GlassMaterial();
@@ -123,11 +120,23 @@ class Ship {
         variant: "radar",
         uniforms: {
           uTargetAspectScale: 2.777,
+          uTargetCount: 6,
         },
       }),
       right: {
         "00": new ScreenPatternMaterial({ variant: "orbitals" }),
-        "01": new ScreenPatternMaterial({ variant: "wave" }),
+        "01": new ScreenPatternMaterial({
+          variant: "wave",
+          uniforms: {
+            uSweepColor: new THREE.Color(0x5863fd),
+            uSweepFrequency: 3,
+            uSweepThickness: 0.6,
+            uWaveColor: new THREE.Color(0xb23838),
+            uWaveThickness: 0.035,
+            uWaveAmplitude: 0.165,
+            uGridColor: new THREE.Color(0xc7cdff),
+          },
+        }),
         "02": new ScreenPatternMaterial({
           variant: "targeting",
           uniforms: {
@@ -139,7 +148,7 @@ class Ship {
         "03": new ScreenPatternMaterial({
           variant: "radar",
           uniforms: {
-            uTargetCount: 2,
+            uTargetCount: 3,
             uGridColor: new THREE.Color(0xbec5e5),
             uSweepColor: new THREE.Color(0xbec5e5),
             uTargetColor: new THREE.Color(0xbec5e5),
@@ -160,10 +169,11 @@ class Ship {
             uGridIntensity: 0.76,
             uTargetColor: new THREE.Color(0x326ac3),
             uTargetRadius: 0.047,
-            uSweepColor: new THREE.Color(0x4173b4),
+            uSweepColor: new THREE.Color(0x7b97bc),
             uSweepFrequency: 3.4,
             uSweepSpeed: 0.3,
             uSweepThickness: 0.025,
+            uTargetCount: 7,
           },
         }),
         "01": new ScreenPatternMaterial({
@@ -202,6 +212,9 @@ class Ship {
       gold: new THREE.MeshMatcapMaterial({
         matcap: this.textures["gold_matcap_texture"],
       }),
+      blackScreen: new THREE.MeshMatcapMaterial({
+        matcap: this.textures["black_screen_matcap_texture"],
+      }),
       redLights: new THREE.MeshBasicMaterial({ color: 0xff1331 }),
       whiteLights: new THREE.MeshBasicMaterial({
         color: 0xfefefe,
@@ -214,7 +227,6 @@ class Ship {
         color: 0xd6efff,
       }),
       // CUSTOM
-      hologram: this.hologramMaterial.material,
       spotLight: this.spotLightMaterial.material,
       radarPattern: this.screenPatternsMaterials.left.material,
       orbitalsPattern: this.screenPatternsMaterials.right["00"].material,
@@ -233,12 +245,12 @@ class Ship {
       { name: "part_2", material: "bake02" },
       { name: "glass", material: "glass" },
       { name: "holoprojector_gold", material: "gold" },
+      { name: "holoprojector_screen", material: "blackScreen" },
       { name: "red_lights", material: "redLights" },
       { name: "white_lights", material: "whiteLights" },
       { name: "rounded_lights", material: "roundedLights" },
       { name: "hologram_source", material: "hologramLightSource" },
       { name: "hologram_light", material: "spotLight" },
-      { name: "darth_vader", material: "hologram", root: this.vaderModel },
       { name: "left_board_screen", material: "radarPattern" },
       { name: "right_board_screen", material: "orbitalsPattern" },
       { name: "right_board_screen001", material: "wavePattern" },
@@ -274,9 +286,6 @@ class Ship {
     const glass = this.tweaks.addFolder("Glass");
     this.glassMaterial.setupTweaks(glass);
 
-    const hologram = this.tweaks.addFolder("Hologram");
-    this.hologramMaterial.setupTweaks(hologram);
-
     const screens = this.tweaks.addFolder("Screens");
     screens.open();
 
@@ -305,7 +314,7 @@ class Ship {
   }
 
   update() {
-    this.hologramMaterial.update();
+    this.darthVader.update();
     this.spotLightMaterial.update();
     this.screenPatternsMaterials.left.update();
     this.screenPatternsMaterials.right["00"].update();
@@ -319,6 +328,7 @@ class Ship {
 
   dispose() {
     this.tweaks?.destroy();
+    this.darthVader.dispose();
     this.glassMaterial.dispose();
   }
 }

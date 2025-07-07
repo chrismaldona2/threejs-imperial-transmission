@@ -20,6 +20,11 @@ export const sources: Source[] = [
     path: "./models/darth_vader.glb",
   },
   {
+    name: "darth_vader_lego_model",
+    type: "gltf",
+    path: "./models/darth_vader_lego.glb",
+  },
+  {
     name: "baked_texture_part1",
     type: "texture",
     path: "./textures/bake/baked_part1_4k_edited.png",
@@ -38,6 +43,11 @@ export const sources: Source[] = [
     name: "gold_matcap_texture",
     type: "texture",
     path: "./textures/matcaps/gold_matcap_2.jpg",
+  },
+  {
+    name: "black_screen_matcap_texture",
+    type: "texture",
+    path: "./textures/matcaps/black_screen_matcap_5.jpg",
   },
   {
     name: "rounded_lights_texture",

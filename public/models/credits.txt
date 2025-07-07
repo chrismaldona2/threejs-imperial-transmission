@@ -1,0 +1,9 @@
+The ship was fully modeled and baked by me using Blender.
+
+The Darth Vader model was sourced from CGTrader:
+https://www.cgtrader.com/free-3d-models/scanned/various/darth-vader-0ef2e04c-8bbd-424d-84c4-dcfc2404b44f
+
+The LEGO Darth Vader model was sourced from The Models Resource:
+https://www.models-resource.com/pc_computer/legostarwarsthecompletesaga/model/56478/
+
+This project is non-commercial and for educational/personal use only.

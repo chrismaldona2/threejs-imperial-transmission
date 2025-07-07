@@ -48,9 +48,6 @@ class PostProccessing {
     );
     this.composer.addPass(this.bloomPass);
 
-    // this.gammaCorrectionPass = new ShaderPass(GammaCorrectionShader);
-    // this.composer.addPass(this.gammaCorrectionPass);
-
     const AcesFilmicShaderPass = {
       uniforms: {
         tDiffuse: { value: null },
