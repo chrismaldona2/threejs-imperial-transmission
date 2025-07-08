@@ -15,14 +15,14 @@ export const sources: Source[] = [
     path: "./models/ship.glb",
   },
   {
-    name: "darth_vader_model",
+    name: "highpoly_vader_model",
     type: "gltf",
-    path: "./models/darth_vader.glb",
+    path: "./models/highpoly_vader.glb",
   },
   {
-    name: "darth_vader_lego_model",
+    name: "lego_vader_model",
     type: "gltf",
-    path: "./models/darth_vader_lego.glb",
+    path: "./models/lego_vader.glb",
   },
   {
     name: "baked_texture_part1",

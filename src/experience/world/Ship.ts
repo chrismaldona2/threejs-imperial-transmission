@@ -94,9 +94,9 @@ class Ship {
     this.shipModel.name = "ShipModel";
 
     /* DARTH VADER */
-    this.darthVader = new VaderHologram();
+    this.darthVader = new VaderHologram("highpoly", this.group);
 
-    this.group.add(this.shipModel, this.darthVader.currentMesh);
+    this.group.add(this.shipModel);
   }
 
   private setupTextures() {

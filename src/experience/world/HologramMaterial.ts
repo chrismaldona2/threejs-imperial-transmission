@@ -14,6 +14,7 @@ interface HologramMaterialOptions {
   fresnelFalloffStart?: number;
   glitchIntensity?: number;
   blending?: THREE.Blending;
+  opacity?: number;
 }
 
 class HologramMaterial {
@@ -33,6 +34,7 @@ class HologramMaterial {
       fresnelFalloffStart: 0.9,
       glitchIntensity: 0.05,
       blending: THREE.AdditiveBlending,
+      opacity: 1,
     };
     const config = { ...defaults, ...options };
 
@@ -47,6 +49,7 @@ class HologramMaterial {
         uFresnelBoost: new THREE.Uniform(config.fresnelBoost),
         uFresnelFalloffStart: new THREE.Uniform(config.fresnelFalloffStart),
         uGlitchIntensity: new THREE.Uniform(config.glitchIntensity),
+        uOpacity: new THREE.Uniform(config.opacity),
       },
       vertexShader,
       fragmentShader,

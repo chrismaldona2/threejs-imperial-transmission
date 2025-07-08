@@ -9,7 +9,7 @@ uniform float uStripeSharpness;
 uniform float uFresnelSharpness;
 uniform float uFresnelBoost;
 uniform float uFresnelFalloffStart;
-
+uniform float uOpacity;
 
 void main() {
   vec3 normal = normalize(vNormal);
@@ -30,6 +30,7 @@ void main() {
   float strength = stripes * fresnel;
   strength += fresnel * uFresnelBoost;
   strength *= falloff;
+  strength *= uOpacity;
 
   gl_FragColor = vec4(uColor, strength);
   #include <colorspace_fragment>
