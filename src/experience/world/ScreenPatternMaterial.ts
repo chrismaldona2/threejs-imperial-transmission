@@ -1,10 +1,10 @@
 import * as THREE from "three";
 import Experience from "../Experience";
-import vertexShader from "../../shaders/screenPattern/vertex.glsl";
-import radarFragment from "../../shaders/screenPattern/radarFragment.glsl";
-import waveFragment from "../../shaders/screenPattern/waveFragment.glsl";
-import orbitalFragments from "../../shaders/screenPattern/orbitalsFragment.glsl";
-import targetingFragment from "../../shaders/screenPattern/targetingFragment.glsl";
+import vertexShader from "../../shaders/screen_pattern/vertex.glsl";
+import radarFragment from "../../shaders/screen_pattern/radarFragment.glsl";
+import waveFragment from "../../shaders/screen_pattern/waveFragment.glsl";
+import orbitalFragments from "../../shaders/screen_pattern/orbitalsFragment.glsl";
+import targetingFragment from "../../shaders/screen_pattern/targetingFragment.glsl";
 import type GUI from "lil-gui";
 
 class ScreenPatternMaterial {

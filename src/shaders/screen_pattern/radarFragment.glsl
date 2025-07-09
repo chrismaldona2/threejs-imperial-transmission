@@ -21,7 +21,7 @@ uniform float uTargetBlinkSpeed;
 uniform float uMinTargetRadiusPercentage;
 uniform float uTargetAspectScale;
 
-#include ../partials/scannerBar.glsl
+#include ../partials/scanner_bar.glsl
 
 void main() {
   vec2 gridUv = vUv + uGridDisplacement;

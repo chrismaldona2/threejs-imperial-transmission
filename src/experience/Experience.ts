@@ -7,7 +7,7 @@ import Renderer from "./Renderer";
 import World from "./world/World";
 import Resources from "./utils/Resources";
 import Debug from "./utils/Debug";
-import PostProccessing from "./utils/PostProccessing";
+import PostProccessing from "./PostProccessing";
 
 class Experience {
   private static instance: Experience;
@@ -16,6 +16,7 @@ class Experience {
   canvas: Canvas;
   scene: THREE.Scene;
   camera: Camera;
+  listener: THREE.AudioListener;
   renderer: Renderer;
   postprocessing: PostProccessing;
   resources: Resources;
@@ -31,6 +32,8 @@ class Experience {
     this.canvas = new Canvas();
     this.scene = new THREE.Scene();
     this.camera = new Camera();
+    this.listener = new THREE.AudioListener();
+    this.camera.instance.add(this.listener);
     this.renderer = new Renderer();
     this.postprocessing = new PostProccessing();
     this.resources = new Resources();

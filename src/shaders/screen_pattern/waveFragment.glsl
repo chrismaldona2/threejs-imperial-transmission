@@ -23,7 +23,7 @@ uniform float uSweepThickness;
 uniform vec3 uSweepColor;
 
 
-#include ../partials/scannerBar.glsl
+#include ../partials/scanner_bar.glsl
 
 void main() {
   vec2 gridUv = vUv + uGridDisplacement;
