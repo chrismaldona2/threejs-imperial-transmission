@@ -3,16 +3,18 @@ import type { GLTF } from "three/examples/jsm/Addons.js";
 import Experience from "../Experience";
 import HologramMaterial from "./HologramMaterial";
 import gsap from "gsap";
+import AudioFader from "../utils/AudioFader";
 
 class VaderHologram {
   private readonly experience = Experience.getInstance();
   private readonly resources = this.experience.resources;
+  private readonly audioRegistry = this.experience.audioRegistry;
   private readonly listener = this.experience.listener;
 
   private activeMesh: "highpoly" | "lego";
   private material!: HologramMaterial;
-  private breathSound!: THREE.PositionalAudio;
-  private hologramSwitchSound!: THREE.PositionalAudio;
+  private breathAudio!: THREE.PositionalAudio;
+  private hologramSwitchAudio!: THREE.PositionalAudio;
   private highPolyMesh!: THREE.Mesh;
   private legoMesh!: THREE.Mesh;
 
@@ -43,6 +45,10 @@ class VaderHologram {
     this.highPolyMesh.geometry.dispose();
     this.legoMesh.geometry.dispose();
     this.material.dispose();
+    this.breathAudio.stop();
+    this.breathAudio.disconnect();
+    this.hologramSwitchAudio.stop();
+    this.hologramSwitchAudio.disconnect();
     window.removeEventListener("mousemove", this.handleMouseMove);
     window.removeEventListener("click", this.handleMouseClick);
   }
@@ -103,29 +109,37 @@ class VaderHologram {
     const { active } = this.getActiveMeshInfo();
 
     /* BREATH */
-    const breathAudioBuffer = this.resources.getAsset<AudioBuffer>(
-      "vader_breathing_sound"
+    const breathAudioBuffer = this.resources.get<AudioBuffer>(
+      "vader_breathing_audio"
     );
-    this.breathSound = new THREE.PositionalAudio(this.listener);
-    this.breathSound.setBuffer(breathAudioBuffer);
-    this.breathSound.setRefDistance(0.5);
-    this.breathSound.setLoop(true);
-    this.breathSound.setVolume(0.5);
-    this.breathSound.play();
+    this.breathAudio = new THREE.PositionalAudio(this.listener);
+    this.breathAudio.setBuffer(breathAudioBuffer);
+    this.breathAudio.setRefDistance(0.85);
+    this.breathAudio.setLoop(true);
+    this.breathAudio.setVolume(0.66);
+    this.audioRegistry.register("vader_breath", this.breathAudio);
 
     /* HOLOGRAM SWITCH */
-    const switchAudioBuffer =
-      this.resources.getAsset<AudioBuffer>("hologram_sound");
-    this.hologramSwitchSound = new THREE.PositionalAudio(this.listener);
-    this.hologramSwitchSound.setBuffer(switchAudioBuffer);
-    this.hologramSwitchSound.setRefDistance(0.5);
-    this.hologramSwitchSound.setVolume(0.7);
+    const switchAudioBuffer = this.resources.get<AudioBuffer>(
+      "hologram_switch_audio"
+    );
+    this.hologramSwitchAudio = new THREE.PositionalAudio(this.listener);
+    this.hologramSwitchAudio.setBuffer(switchAudioBuffer);
+    this.hologramSwitchAudio.setRefDistance(0.5);
+    this.hologramSwitchAudio.setVolume(0.7);
+    this.audioRegistry.register("hologram_switch", this.hologramSwitchAudio);
+    window.addEventListener("click", this.playBreathAudio);
 
-    active.add(this.breathSound, this.hologramSwitchSound);
+    active.add(this.breathAudio, this.hologramSwitchAudio);
   }
 
+  private playBreathAudio = () => {
+    AudioFader.fadeIn(this.breathAudio, this.breathAudio.getVolume());
+    window.removeEventListener("click", this.playBreathAudio);
+  };
+
   private getMeshFromGLTF(fileName: string, offsetY = 0): THREE.Mesh {
-    const file = this.resources.getAsset<GLTF>(fileName);
+    const file = this.resources.get<GLTF>(fileName);
     const obj = file.scene.getObjectByName("darth_vader");
     if (!(obj instanceof THREE.Mesh))
       throw new Error(`${fileName} Mesh couldn't be found`);
@@ -155,14 +169,13 @@ class VaderHologram {
   private switchVariant() {
     if (this.isAnimating) return;
     this.isAnimating = true;
+    this.hologramSwitchAudio.play();
 
     const { active, other, activeOriginalScale, otherOriginalScale } =
       this.getActiveMeshInfo();
+    const activeMeshHalfScale = activeOriginalScale.clone().multiplyScalar(0.5);
 
-    this.hologramSwitchSound.play();
-
-    const halfCurrentScale = activeOriginalScale.clone().multiplyScalar(0.5);
-
+    /* ANIMATION */
     const tl = gsap.timeline({
       onComplete: () => {
         this.isAnimating = false;
@@ -183,16 +196,18 @@ class VaderHologram {
     tl.to(
       active.scale,
       {
-        x: halfCurrentScale.x,
-        y: halfCurrentScale.y,
-        z: halfCurrentScale.z,
+        x: activeMeshHalfScale.x,
+        y: activeMeshHalfScale.y,
+        z: activeMeshHalfScale.z,
         duration: 0.5,
         ease: "power2.inOut",
         onComplete: () => {
+          /* SWITCH LOGIC ↓ */
+          // Didn't implement disposing on switch as performance was good, disposing would probably complicate things.
           active.visible = false;
           other.visible = true;
           other.scale.set(0, 0, 0);
-          other.add(this.breathSound, this.hologramSwitchSound);
+          other.add(this.breathAudio, this.hologramSwitchAudio);
         },
       },
       0

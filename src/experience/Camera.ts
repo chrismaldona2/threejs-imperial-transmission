@@ -15,19 +15,19 @@ class Camera {
 
   constructor() {
     this.instance = new THREE.PerspectiveCamera(
-      70,
+      65,
       this.sizes.width / this.sizes.height,
       0.01,
       100
     );
-    this.instance.position.set(-0.5, 1, 3);
+    this.instance.position.set(-2, 1.6, 1.5);
 
     this.controls = new OrbitControls(this.instance, this.canvas);
     this.controls.enableDamping = true;
-    // this.controls.enablePan = false;
-    // this.controls.minDistance = 2;
-    // this.controls.maxDistance = 6;
-    // this.controls.target.set(-0.8, -0.77, -2.38);
+    this.controls.enablePan = false;
+    this.controls.minDistance = 2;
+    this.controls.maxDistance = 4.5;
+    this.controls.target.set(-0.8, 0.25, -2.38);
 
     /* MOUNT */
     this.scene.add(this.instance);

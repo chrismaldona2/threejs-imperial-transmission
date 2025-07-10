@@ -89,7 +89,7 @@ class Ship {
 
   private setupModels() {
     /* SHIP */
-    const shipGltf = this.resources.getAsset<GLTF>("ship_model");
+    const shipGltf = this.resources.get<GLTF>("ship_model");
     this.shipModel = shipGltf.scene;
     this.shipModel.name = "ShipModel";
 
@@ -102,7 +102,7 @@ class Ship {
   private setupTextures() {
     this.textures = Object.fromEntries(
       textureNames.map((textureName) => {
-        const texture = this.resources.getAsset<THREE.Texture>(textureName);
+        const texture = this.resources.get<THREE.Texture>(textureName);
         texture.flipY = false;
         texture.colorSpace = THREE.SRGBColorSpace;
         return [textureName, texture];
@@ -121,6 +121,7 @@ class Ship {
         uniforms: {
           uTargetAspectScale: 2.777,
           uTargetCount: 6,
+          uBackgroundColor: new THREE.Color(0x110d11),
         },
       }),
       right: {
@@ -281,7 +282,6 @@ class Ship {
 
   private setupTweaks() {
     this.tweaks = this.debug.addFolder("Ship");
-    this.tweaks.open();
 
     const glass = this.tweaks.addFolder("Glass");
     this.glassMaterial.setupTweaks(glass);

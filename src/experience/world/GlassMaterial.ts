@@ -21,15 +21,15 @@ class GlassMaterial {
   }
 
   setupTweaks(debugFolder: GUI) {
-    const colors = {
+    const controls = {
       color: this.material.specular.getHex(),
     };
 
     debugFolder
-      .addColor(colors, "color")
+      .addColor(controls, "color")
       .name("Color")
       .onChange(() => {
-        this.material.color.set(colors.color);
+        this.material.color.set(controls.color);
       });
     debugFolder
       .add(this.material, "opacity")

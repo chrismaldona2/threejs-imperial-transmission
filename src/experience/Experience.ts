@@ -8,6 +8,7 @@ import World from "./world/World";
 import Resources from "./utils/Resources";
 import Debug from "./utils/Debug";
 import PostProccessing from "./PostProccessing";
+import AudioRegistry from "./utils/AudioRegistry";
 
 class Experience {
   private static instance: Experience;
@@ -21,6 +22,7 @@ class Experience {
   postprocessing: PostProccessing;
   resources: Resources;
   world: World;
+  audioRegistry: AudioRegistry;
   debug: Debug;
 
   private constructor() {
@@ -38,6 +40,7 @@ class Experience {
     this.postprocessing = new PostProccessing();
     this.resources = new Resources();
     this.world = new World();
+    this.audioRegistry = new AudioRegistry();
 
     this.timer.on("tick", () => this.update());
     this.sizes.on("resize", () => this.resize());

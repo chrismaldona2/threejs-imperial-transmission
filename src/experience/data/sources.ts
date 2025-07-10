@@ -72,13 +72,23 @@ export const sources: Source[] = [
     path: "./sounds/empty_room.mp3",
   },
   {
-    name: "vader_breathing_sound",
+    name: "vader_breathing_audio",
     type: "audio",
     path: "./sounds/vader_breathing.mp3",
   },
   {
-    name: "hologram_sound",
+    name: "hologram_switch_audio",
     type: "audio",
     path: "./sounds/hologram.mp3",
+  },
+  {
+    name: "droid_march_audio",
+    type: "audio",
+    path: "./sounds/droid_march.mp3",
+  },
+  {
+    name: "imperial_march_audio",
+    type: "audio",
+    path: "./sounds/imperial_march.mp3",
   },
 ];

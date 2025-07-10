@@ -33,7 +33,7 @@ class Resources extends EventEmitter {
     super();
     this.items = {};
     this.loaders = this.initLoaders();
-    this.loadAssets();
+    this.load();
   }
 
   private initLoaders(): LoadersRecord {
@@ -50,7 +50,7 @@ class Resources extends EventEmitter {
     };
   }
 
-  private loadAssets() {
+  private load() {
     this.sources.forEach((src) => {
       switch (src.type) {
         case "gltf": {
@@ -123,7 +123,7 @@ class Resources extends EventEmitter {
     if (this.toLoad === this.loaded) this.trigger("loadEnd");
   }
 
-  getAsset<T extends SupportedFiles>(_name: Source["name"]): T {
+  get<T extends SupportedFiles>(_name: Source["name"]): T {
     const asset = this.items[_name] as T;
     if (!asset) throw new Error(`"${_name}" resource was not found.`);
     return asset;

@@ -12,8 +12,7 @@ class SpotLightMaterial {
   material: THREE.ShaderMaterial;
 
   constructor() {
-    const noiseTexture =
-      this.resources.getAsset<THREE.Texture>("noise_texture");
+    const noiseTexture = this.resources.get<THREE.Texture>("noise_texture");
     noiseTexture.wrapS = THREE.RepeatWrapping;
     noiseTexture.wrapT = THREE.RepeatWrapping;
     noiseTexture.needsUpdate = true;
@@ -42,7 +41,7 @@ class SpotLightMaterial {
   }
 
   setupTweaks(gui: GUI) {
-    const debugObj = {
+    const controls = {
       colorTop: this.material.uniforms.uColorTop.value.getHex(),
       colorBottom: this.material.uniforms.uColorBottom.value.getHex(),
     };
@@ -57,15 +56,15 @@ class SpotLightMaterial {
       .name("Blending Mode");
 
     gui
-      .addColor(debugObj, "colorTop")
+      .addColor(controls, "colorTop")
       .onChange(() =>
-        this.material.uniforms.uColorTop.value.set(debugObj.colorTop)
+        this.material.uniforms.uColorTop.value.set(controls.colorTop)
       )
       .name("Color Top");
     gui
-      .addColor(debugObj, "colorBottom")
+      .addColor(controls, "colorBottom")
       .onChange(() =>
-        this.material.uniforms.uColorBottom.value.set(debugObj.colorBottom)
+        this.material.uniforms.uColorBottom.value.set(controls.colorBottom)
       )
       .name("Color Bottom");
 

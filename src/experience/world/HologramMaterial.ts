@@ -61,7 +61,7 @@ class HologramMaterial {
   }
 
   setupTweaks(gui: GUI) {
-    const debugObj = {
+    const controls = {
       color: this.material.uniforms.uColor.value.getHex(),
     };
     gui
@@ -74,9 +74,9 @@ class HologramMaterial {
       })
       .name("Blending Mode");
     gui
-      .addColor(debugObj, "color")
+      .addColor(controls, "color")
       .onChange(() => {
-        this.material.uniforms.uColor.value.set(debugObj.color);
+        this.material.uniforms.uColor.value.set(controls.color);
       })
       .name("Color");
     gui

@@ -1,6 +1,7 @@
 import Experience from "../Experience";
 import Environment from "./Environment";
 import Ship from "./Ship";
+import AudioDebugger from "./AudioDebugger";
 
 class World {
   private readonly experience = Experience.getInstance();
@@ -8,11 +9,13 @@ class World {
 
   private ship?: Ship;
   private environment?: Environment;
+  private audioDebugger?: AudioDebugger;
 
   constructor() {
     this.resources.on("loadEnd", () => {
       this.environment = new Environment();
       this.ship = new Ship();
+      this.audioDebugger = new AudioDebugger();
     });
   }
 
@@ -23,6 +26,7 @@ class World {
   dispose() {
     this.environment?.dispose();
     this.ship?.dispose();
+    this.audioDebugger?.dispose();
   }
 }
 

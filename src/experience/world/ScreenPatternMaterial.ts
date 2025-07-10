@@ -186,16 +186,16 @@ class ScreenPatternMaterial {
 
   private setupWaveSpecificTweaks(gui: GUI) {
     const uniforms = this.material.uniforms;
-    const colors = {
+    const controls = {
       wave: uniforms.uWaveColor.value.getHex(),
     };
 
     const wave = gui.addFolder("Wave");
     wave
-      .addColor(colors, "wave")
+      .addColor(controls, "wave")
       .name("Wave Color")
       .onChange(() => {
-        uniforms.uWaveColor.value.set(colors.wave);
+        uniforms.uWaveColor.value.set(controls.wave);
       });
     wave
       .add(uniforms.uWaveAmplitude, "value")
@@ -225,16 +225,16 @@ class ScreenPatternMaterial {
 
   private setupOrbitalSpecificTweaks(gui: GUI) {
     const uniforms = this.material.uniforms;
-    const colors = {
+    const controls = {
       ring: uniforms.uRingColor.value.getHex(),
     };
 
     const rings = gui.addFolder("Rings");
     rings
-      .addColor(colors, "ring")
+      .addColor(controls, "ring")
       .name("Ring Color")
       .onChange(() => {
-        uniforms.uRingColor.value.set(colors.ring);
+        uniforms.uRingColor.value.set(controls.ring);
       });
     rings
       .add(uniforms.uRingCount, "value")
@@ -285,7 +285,7 @@ class ScreenPatternMaterial {
 
   private setupTargetingSpecificTweaks(gui: GUI) {
     const uniforms = this.material.uniforms;
-    const colors = {
+    const controls = {
       lines: uniforms.uLinesColor.value.getHex(),
       borders: uniforms.uBordersColor.value.getHex(),
       cross: uniforms.uCrossColor.value.getHex(),
@@ -293,10 +293,10 @@ class ScreenPatternMaterial {
 
     const lines = gui.addFolder("Lines");
     lines
-      .addColor(colors, "lines")
+      .addColor(controls, "lines")
       .name("Lines Color")
       .onChange(() => {
-        uniforms.uLinesColor.value.set(colors.lines);
+        uniforms.uLinesColor.value.set(controls.lines);
       });
     lines
       .add(uniforms.uAnimationSpeed, "value")
@@ -325,10 +325,10 @@ class ScreenPatternMaterial {
 
     const borders = gui.addFolder("Borders");
     borders
-      .addColor(colors, "borders")
+      .addColor(controls, "borders")
       .name("Borders Color")
       .onChange(() => {
-        uniforms.uBordersColor.value.set(colors.borders);
+        uniforms.uBordersColor.value.set(controls.borders);
       });
     borders
       .add(uniforms.uBordersThickness, "value")
@@ -345,10 +345,10 @@ class ScreenPatternMaterial {
 
     const cross = gui.addFolder("Cross");
     cross
-      .addColor(colors, "cross")
+      .addColor(controls, "cross")
       .name("Cross Color")
       .onChange(() => {
-        uniforms.uCrossColor.value.set(colors.cross);
+        uniforms.uCrossColor.value.set(controls.cross);
       });
     cross
       .add(uniforms.uCrossThickness, "value")
@@ -372,7 +372,7 @@ class ScreenPatternMaterial {
     maxTargets?: number
   ): void {
     const uniforms = this.material.uniforms;
-    const colors = {
+    const controls = {
       background: uniforms.uBackgroundColor.value.getHex(),
       grid: uniforms.uGridColor?.value.getHex(),
       sweepLine: uniforms.uSweepColor?.value.getHex(),
@@ -380,19 +380,19 @@ class ScreenPatternMaterial {
     };
 
     gui
-      .addColor(colors, "background")
+      .addColor(controls, "background")
       .name("Background Color")
       .onChange(() => {
-        uniforms.uBackgroundColor.value.set(colors.background);
+        uniforms.uBackgroundColor.value.set(controls.background);
       });
 
     if (hasGrid) {
       const folder = gui.addFolder("Grid");
       folder
-        .addColor(colors, "grid")
+        .addColor(controls, "grid")
         .name("Grid Color")
         .onChange(() => {
-          uniforms.uGridColor.value.set(colors.grid);
+          uniforms.uGridColor.value.set(controls.grid);
         });
       folder
         .add(uniforms.uGridIntensity, "value")
@@ -435,10 +435,10 @@ class ScreenPatternMaterial {
     if (hasSweepLine) {
       const folder = gui.addFolder("Sweep Line");
       folder
-        .addColor(colors, "sweepLine")
+        .addColor(controls, "sweepLine")
         .name("Sweep Line Color")
         .onChange(() => {
-          uniforms.uSweepColor.value.set(colors.sweepLine);
+          uniforms.uSweepColor.value.set(controls.sweepLine);
         });
       folder
         .add(uniforms.uSweepThickness, "value")
@@ -463,10 +463,10 @@ class ScreenPatternMaterial {
     if (hasTargets) {
       const folder = gui.addFolder("Targets");
       folder
-        .addColor(colors, "target")
+        .addColor(controls, "target")
         .name("Target Color")
         .onChange(() => {
-          uniforms.uTargetColor.value.set(colors.target);
+          uniforms.uTargetColor.value.set(controls.target);
         });
       folder
         .add(uniforms.uTargetCount, "value")
