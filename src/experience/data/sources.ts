@@ -1,10 +1,16 @@
 type SinglePathSource = { name: string; path: string };
-type MultiplePathSource = { name: string; path: string[] };
+type MultiplePathSource = { name: string; paths: string[] };
 
 type GLTFSource = SinglePathSource & { type: "gltf" };
-type TextureSource = SinglePathSource & { type: "texture" };
+type TextureSource = SinglePathSource & {
+  type: "texture";
+  fallbackPath?: string;
+};
 type AudioSource = SinglePathSource & { type: "audio" };
-type CubeMapSource = MultiplePathSource & { type: "cubemap" };
+type CubeMapSource = MultiplePathSource & {
+  type: "cubemap";
+  fallbackPaths?: string[];
+};
 
 export type Source = GLTFSource | TextureSource | CubeMapSource | AudioSource;
 
@@ -25,45 +31,64 @@ export const sources: Source[] = [
     path: "./models/lego_vader.glb",
   },
   {
+    name: "funko_vader_model",
+    type: "gltf",
+    path: "./models/funko_vader.glb",
+  },
+  {
     name: "baked_texture_part1",
     type: "texture",
-    path: "./textures/bake/baked_part1_4k_edited.png",
+    path: "./textures/bake/baked_p1.webp",
+    fallbackPath: "./textures/bake/baked_p1.png",
   },
   {
     name: "baked_texture_part2",
     type: "texture",
-    path: "./textures/bake/baked_part2_4k.png",
-  },
-  {
-    name: "noise_texture",
-    type: "texture",
-    path: "./textures/noise.png",
-  },
-  {
-    name: "gold_matcap_texture",
-    type: "texture",
-    path: "./textures/matcaps/gold_matcap_2.jpg",
-  },
-  {
-    name: "black_screen_matcap_texture",
-    type: "texture",
-    path: "./textures/matcaps/black_screen_matcap_5.jpg",
+    path: "./textures/bake/baked_p2.webp",
+    fallbackPath: "./textures/bake/baked_p2.png",
   },
   {
     name: "rounded_lights_texture",
     type: "texture",
-    path: "./textures/bake/rounded_lights.png",
+    path: "./textures/bake/rounded_lights.webp",
+    fallbackPath: "./textures/bake/rounded_lights.png",
+  },
+  {
+    name: "noise_texture",
+    type: "texture",
+    path: "./textures/noise.webp",
+    fallbackPath: "./textures/noise.png",
+  },
+  {
+    name: "gold_matcap_texture",
+    type: "texture",
+    path: "./textures/matcaps/gold.webp",
+    fallbackPath: "./textures/matcaps/gold.jpg",
+  },
+  {
+    name: "black_screen_matcap_texture",
+    type: "texture",
+    path: "./textures/matcaps/black_screen.webp",
+    fallbackPath: "./textures/matcaps/black_screen.jpg",
   },
   {
     name: "space_cubemap",
     type: "cubemap",
-    path: [
-      "./textures/cubemaps/space_2/px.png",
-      "./textures/cubemaps/space_2/nx.png",
-      "./textures/cubemaps/space_2/py.png",
-      "./textures/cubemaps/space_2/ny.png",
-      "./textures/cubemaps/space_2/pz.png",
-      "./textures/cubemaps/space_2/nz.png",
+    paths: [
+      "./textures/cubemaps/space/px.webp",
+      "./textures/cubemaps/space/nx.webp",
+      "./textures/cubemaps/space/py.webp",
+      "./textures/cubemaps/space/ny.webp",
+      "./textures/cubemaps/space/pz.webp",
+      "./textures/cubemaps/space/nz.webp",
+    ],
+    fallbackPaths: [
+      "./textures/cubemaps/space/px.png",
+      "./textures/cubemaps/space/nx.png",
+      "./textures/cubemaps/space/py.png",
+      "./textures/cubemaps/space/ny.png",
+      "./textures/cubemaps/space/pz.png",
+      "./textures/cubemaps/space/nz.png",
     ],
   },
   {

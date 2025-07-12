@@ -5,6 +5,7 @@ class Debug {
 
   constructor() {
     this.instance = new GUI({ title: "Tweaks", closeFolders: true });
+    this.instance.close();
   }
 
   dispose() {

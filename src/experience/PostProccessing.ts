@@ -53,7 +53,7 @@ class PostProccessing {
     const AcesFilmicShaderPass = {
       uniforms: {
         tDiffuse: { value: null },
-        exposure: { value: 1.0 },
+        uExposure: { value: 1.1 },
       },
       vertexShader: acesVertexShader,
       fragmentShader: acesFragmentShader,
@@ -73,6 +73,12 @@ class PostProccessing {
 
   setupTweaks() {
     const folder = this.debug.addFolder("Post Processing");
+    folder
+      .add(this.acesFilmicPass.uniforms.uExposure, "value")
+      .name("Exposure")
+      .min(0)
+      .max(3)
+      .step(0.001);
     folder.add(this.bloomPass, "enabled").name("Bloom Enabled");
     folder
       .add(this.bloomPass, "strength")

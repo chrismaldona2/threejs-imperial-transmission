@@ -1,9 +1,32 @@
-The ship was fully modeled and baked by me using Blender.
+Credits
+=======
 
-The Darth Vader model was sourced from CGTrader:
-https://www.cgtrader.com/free-3d-models/scanned/various/darth-vader-0ef2e04c-8bbd-424d-84c4-dcfc2404b44f
 
-The LEGO Darth Vader model was sourced from The Models Resource:
-https://www.models-resource.com/pc_computer/legostarwarsthecompletesaga/model/56478/
+Ship Model
+----------
+The ship was fully modeled, UV unwrapped, and baked by me using Blender.
 
-This project is non-commercial and for educational/personal use only.
+
+
+Darth Vader Variants
+--------------------
+• High Poly Darth Vader  
+  Source: CGTrader  
+  URL: https://www.cgtrader.com/free-3d-models/scanned/various/darth-vader-0ef2e04c-8bbd-424d-84c4-dcfc2404b44f  
+
+• LEGO Darth Vader  
+  Source: The Models Resource  
+  Game: LEGO Star Wars: The Complete Saga  
+  URL: https://www.models-resource.com/pc_computer/legostarwarsthecompletesaga/model/56478/  
+
+• Funko Darth Vader (Low Poly)  
+  Source: MakerWorld  
+  Creator: @Tuko, profile: https://makerworld.com/en/@Tuko  
+  Model: https://makerworld.com/en/models/1247367-darth-vader-funko-lowpoly  
+
+
+
+Disclaimer
+----------
+This project is strictly non-commercial and intended for educational and personal use only.
+All rights for third-party models belong to their respective creators and platforms.

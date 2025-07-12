@@ -9,9 +9,13 @@ import Resources from "./utils/Resources";
 import Debug from "./utils/Debug";
 import PostProccessing from "./PostProccessing";
 import AudioRegistry from "./utils/AudioRegistry";
+import LoadingScreen from "./LoadingScreen";
 
 class Experience {
   private static instance: Experience;
+  debug: Debug;
+  resources: Resources;
+  loadingScreen: LoadingScreen;
   timer: Timer;
   sizes: Sizes;
   canvas: Canvas;
@@ -20,15 +24,15 @@ class Experience {
   listener: THREE.AudioListener;
   renderer: Renderer;
   postprocessing: PostProccessing;
-  resources: Resources;
   world: World;
   audioRegistry: AudioRegistry;
-  debug: Debug;
 
   private constructor() {
     Experience.instance = this;
 
     this.debug = new Debug();
+    this.resources = new Resources();
+    this.loadingScreen = new LoadingScreen();
     this.timer = new Timer();
     this.sizes = new Sizes();
     this.canvas = new Canvas();
@@ -38,7 +42,6 @@ class Experience {
     this.camera.instance.add(this.listener);
     this.renderer = new Renderer();
     this.postprocessing = new PostProccessing();
-    this.resources = new Resources();
     this.world = new World();
     this.audioRegistry = new AudioRegistry();
 

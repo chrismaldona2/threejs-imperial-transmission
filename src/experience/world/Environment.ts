@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import Experience from "../Experience";
-import AudioFader from "../utils/AudioFader";
+import type GUI from "lil-gui";
 
 class Environment {
   private readonly experience = Experience.getInstance();
@@ -10,18 +10,26 @@ class Environment {
   private readonly listener = this.experience.listener;
   private readonly debug = this.experience.debug.instance;
 
-  private ambientLight: THREE.AmbientLight;
-  private environmentMap: THREE.CubeTexture;
+  private ambientLight!: THREE.AmbientLight;
+  private environmentMap!: THREE.CubeTexture;
   private ambientSound!: THREE.Audio;
   private backgroundMusic!: THREE.Audio;
 
-  private tweaks?: typeof this.debug;
+  private tweaks?: GUI;
 
   constructor() {
-    /* AMBIENT LIGHT */
-    this.ambientLight = new THREE.AmbientLight(0x3e536f, 0.6);
+    this.setupLights();
+    this.setupScene();
+    this.setupAudio();
+    this.setupTweaks();
+  }
 
-    /* ENVIRONMENT MAP */
+  private setupLights() {
+    this.ambientLight = new THREE.AmbientLight(0x3e536f, 0.6);
+    this.scene.add(this.ambientLight);
+  }
+
+  private setupScene() {
     this.environmentMap =
       this.resources.get<THREE.CubeTexture>("space_cubemap");
     this.environmentMap.colorSpace = THREE.SRGBColorSpace;
@@ -29,50 +37,33 @@ class Environment {
     this.scene.background = this.environmentMap;
     this.scene.backgroundRotation.set(3.18, 0, 5.89);
     this.scene.backgroundIntensity = 1;
-    this.scene.add(this.ambientLight);
-    this.setupAmbientSoundAudio();
-    this.setupMusic();
-    window.addEventListener("click", this.playAudios);
-    this.setupTweaks();
   }
 
-  dispose() {
-    this.tweaks?.destroy();
-    this.scene.remove(this.ambientLight);
-    this.ambientLight.dispose();
-    this.environmentMap.dispose();
-    this.ambientSound.stop();
-    this.ambientSound.disconnect();
-  }
-
-  private setupAmbientSoundAudio() {
+  private setupAudio() {
     this.ambientSound = new THREE.Audio(this.listener);
     const ambientSoundBuffer = this.resources.get<AudioBuffer>("ambient_sound");
     this.ambientSound.setBuffer(ambientSoundBuffer);
     this.ambientSound.loop = true;
     this.ambientSound.setVolume(0.66);
     this.audioRegistry.register("ambient_sound", this.ambientSound);
-  }
 
-  private setupMusic() {
-    /* DROID MARCH */
     const droidMarchBuffer =
       this.resources.get<AudioBuffer>("droid_march_audio");
     this.backgroundMusic = new THREE.Audio(this.listener);
     this.backgroundMusic.setBuffer(droidMarchBuffer);
-    this.backgroundMusic.setVolume(0.066);
+    this.backgroundMusic.setVolume(0.077);
     this.backgroundMusic.loop = true;
     this.audioRegistry.register("background_music", this.backgroundMusic);
+
+    window.addEventListener("click", this.playAudio);
+    window.addEventListener("touchend", this.playAudio);
   }
 
-  private playAudios = () => {
-    AudioFader.fadeIn(this.ambientSound, this.ambientSound.getVolume());
-    AudioFader.fadeIn(
-      this.backgroundMusic,
-      this.backgroundMusic.getVolume(),
-      3
-    );
-    window.removeEventListener("click", this.playAudios);
+  private playAudio = () => {
+    if (!this.ambientSound.isPlaying) this.ambientSound.play();
+    if (!this.backgroundMusic.isPlaying) this.backgroundMusic.play();
+    window.removeEventListener("click", this.playAudio);
+    window.removeEventListener("touchend", this.playAudio);
   };
 
   private setupTweaks() {
@@ -121,6 +112,15 @@ class Environment {
       .max(1)
       .step(0.01)
       .name("Intensity");
+  }
+
+  dispose() {
+    this.tweaks?.destroy();
+    this.scene.remove(this.ambientLight);
+    this.ambientLight.dispose();
+    this.environmentMap.dispose();
+    this.ambientSound.stop();
+    this.ambientSound.disconnect();
   }
 }
 

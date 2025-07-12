@@ -27,9 +27,47 @@ body {
   outline: none;
 }
 
+.loading_screen {
+  z-index: 9999;
+  position: fixed;
+  inset: 0;
+  background-color: #0a0a0c;
+  will-change: opacity;
+  transition: opacity 0.3s ease;
+  display: flex;
+  gap: 1rem;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.saber_container {
+  display: flex;
+  align-items: center;
+  justify-content: start;
+  width: min(300px, 85%);
+  height: 1.5rem;
+  position: relative;
+}
+
+.saber_hilt {
+  height: 100%;
+  width: fit-content;
+  z-index: 10;
+}
+
+.saber_light {
+  position: absolute;
+  height: 40%;
+  width: 0;
+  background-color: #fa2637;
+  border-top-right-radius: 1rem;
+  border-bottom-right-radius: 1rem;
+}
+
 .lil-gui {
   visibility: hidden;
-
   --width: min(450px, 95%);
 }
 

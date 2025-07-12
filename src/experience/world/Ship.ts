@@ -5,35 +5,8 @@ import ScreenPatternMaterial from "./ScreenPatternMaterial";
 import SpotLightMaterial from "./SpotLightMaterial";
 import GlassMaterial from "./GlassMaterial";
 import VaderHologram from "./VaderHologram";
-
-const materialNames = [
-  "bake01",
-  "bake02",
-  "glass",
-  "gold",
-  "blackScreen",
-  "hologramLightSource",
-  "redLights",
-  "whiteLights",
-  "roundedLights",
-  "spotLight",
-  "radarPattern",
-  "radarPatternVariant",
-  "radarPatternVariant2",
-  "wavePattern",
-  "wavePatternVariant2",
-  "wavePatternVariant3",
-  "orbitalsPattern",
-  "targetingPattern",
-] as const;
-
-const textureNames = [
-  "baked_texture_part1",
-  "baked_texture_part2",
-  "gold_matcap_texture",
-  "black_screen_matcap_texture",
-  "rounded_lights_texture",
-] as const;
+import type GUI from "lil-gui";
+import DustParticles from "./DustParticles";
 
 type MaterialNames = (typeof materialNames)[number];
 type TextureNames = (typeof textureNames)[number];
@@ -56,6 +29,7 @@ class Ship {
   private materials!: Record<MaterialNames, THREE.Material>;
 
   private darthVader!: VaderHologram;
+  private dustParticles!: DustParticles;
 
   /* CUSTOM MATERIALS */
   private glassMaterial!: GlassMaterial;
@@ -75,7 +49,7 @@ class Ship {
     };
   };
 
-  private tweaks?: typeof this.debug;
+  private tweaks?: GUI;
 
   constructor() {
     this.group.name = "ShipGroup";
@@ -83,6 +57,7 @@ class Ship {
     this.setupTextures();
     this.createMaterials();
     this.applyMaterials();
+    this.setupParticles();
     this.setupTweaks();
     this.scene.add(this.group);
   }
@@ -95,7 +70,6 @@ class Ship {
 
     /* DARTH VADER */
     this.darthVader = new VaderHologram("highpoly", this.group);
-
     this.group.add(this.shipModel);
   }
 
@@ -199,7 +173,6 @@ class Ship {
         }),
       },
     };
-
     /* MATERIALS MAPPING */
     this.materials = {
       // BASIC
@@ -241,61 +214,48 @@ class Ship {
   }
 
   private applyMaterials() {
-    const meshMaterialsMap: MeshMaterialConfig[] = [
-      { name: "part_1", material: "bake01" },
-      { name: "part_2", material: "bake02" },
-      { name: "glass", material: "glass" },
-      { name: "holoprojector_gold", material: "gold" },
-      { name: "holoprojector_screen", material: "blackScreen" },
-      { name: "red_lights", material: "redLights" },
-      { name: "white_lights", material: "whiteLights" },
-      { name: "rounded_lights", material: "roundedLights" },
-      { name: "hologram_source", material: "hologramLightSource" },
-      { name: "hologram_light", material: "spotLight" },
-      { name: "left_board_screen", material: "radarPattern" },
-      { name: "right_board_screen", material: "orbitalsPattern" },
-      { name: "right_board_screen001", material: "wavePattern" },
-      { name: "right_board_screen002", material: "radarPatternVariant" },
-      { name: "right_board_screen003", material: "targetingPattern" },
-      { name: "corner_board_screen", material: "radarPatternVariant2" },
-      { name: "corner_board_screen001", material: "wavePatternVariant2" },
-      { name: "corner_board_screen002", material: "wavePatternVariant3" },
-    ];
-
-    meshMaterialsMap.forEach((record) => {
-      const mesh = this.getMesh(record.name, record.root);
-      if (mesh) mesh.material = this.materials[record.material];
+    meshMaterialsMap.forEach(({ name, root, material }) => {
+      const mesh = this.getMesh(name, root);
+      mesh.material = this.materials[material];
     });
+  }
+
+  private setupParticles() {
+    this.dustParticles = new DustParticles();
+    this.group.add(this.dustParticles.points);
   }
 
   private getMesh(
     name: string,
     root: THREE.Object3D = this.shipModel
-  ): THREE.Mesh | null {
+  ): THREE.Mesh {
     const mesh = root.getObjectByName(name);
-    if (!mesh || !(mesh instanceof THREE.Mesh)) {
-      console.warn(`Lab: couldn’t find mesh named "${name}"`);
-      return null;
-    }
+
+    if (!mesh || !(mesh instanceof THREE.Mesh))
+      throw new Error(`'${name}' Mesh couldn't be found `);
+
     return mesh;
   }
 
   private setupTweaks() {
     this.tweaks = this.debug.addFolder("Ship");
 
+    const hologram = this.tweaks.addFolder("Hologram");
+    this.darthVader.setupTweaks(hologram);
+
     const glass = this.tweaks.addFolder("Glass");
     this.glassMaterial.setupTweaks(glass);
 
-    const screens = this.tweaks.addFolder("Screens");
-    screens.open();
+    const particles = this.tweaks.addFolder("Particles");
+    this.dustParticles.setupTweaks(particles);
 
+    const screens = this.tweaks.addFolder("Screens");
     const leftScreens = screens.addFolder("Left");
     const rightScreens = screens.addFolder("Right");
     const cornerScreens = screens.addFolder("Corner");
 
     const radar_left = leftScreens.addFolder("Radar");
     this.screenPatternsMaterials.left.setupTweaks(radar_left);
-
     const orbital_right = rightScreens.addFolder("Orbital");
     const wave_right = rightScreens.addFolder("Wave");
     const targeting_right = rightScreens.addFolder("Targeting");
@@ -304,7 +264,6 @@ class Ship {
     this.screenPatternsMaterials.right["01"].setupTweaks(wave_right);
     this.screenPatternsMaterials.right["02"].setupTweaks(targeting_right);
     this.screenPatternsMaterials.right["03"].setupTweaks(radar_right);
-
     const radar_corner = cornerScreens.addFolder("Radar");
     const wave_corner_01 = cornerScreens.addFolder("Wave 01");
     const wave_corner_02 = cornerScreens.addFolder("Wave 02");
@@ -315,22 +274,83 @@ class Ship {
 
   update() {
     this.darthVader.update();
+    this.dustParticles.update();
     this.spotLightMaterial.update();
+
+    const updateGroup = (group: Record<string, ScreenPatternMaterial>) =>
+      Object.values(group).forEach((material) => material.update());
     this.screenPatternsMaterials.left.update();
-    this.screenPatternsMaterials.right["00"].update();
-    this.screenPatternsMaterials.right["01"].update();
-    this.screenPatternsMaterials.right["02"].update();
-    this.screenPatternsMaterials.right["03"].update();
-    this.screenPatternsMaterials.corner["00"].update();
-    this.screenPatternsMaterials.corner["01"].update();
-    this.screenPatternsMaterials.corner["02"].update();
+
+    updateGroup(this.screenPatternsMaterials.right);
+    updateGroup(this.screenPatternsMaterials.corner);
   }
 
   dispose() {
     this.tweaks?.destroy();
     this.darthVader.dispose();
+    this.dustParticles.dispose();
     this.glassMaterial.dispose();
+    this.spotLightMaterial.dispose();
+
+    // Dispose all screen materials
+    const disposeGroup = (group: Record<string, ScreenPatternMaterial>) =>
+      Object.values(group).forEach((material) => material.dispose());
+
+    this.screenPatternsMaterials.left.dispose();
+    disposeGroup(this.screenPatternsMaterials.right);
+    disposeGroup(this.screenPatternsMaterials.corner);
   }
 }
 
 export default Ship;
+
+/* CONSTANTS */
+const materialNames = [
+  "bake01",
+  "bake02",
+  "glass",
+  "gold",
+  "blackScreen",
+  "hologramLightSource",
+  "redLights",
+  "whiteLights",
+  "roundedLights",
+  "spotLight",
+  "radarPattern",
+  "radarPatternVariant",
+  "radarPatternVariant2",
+  "wavePattern",
+  "wavePatternVariant2",
+  "wavePatternVariant3",
+  "orbitalsPattern",
+  "targetingPattern",
+] as const;
+
+const textureNames = [
+  "baked_texture_part1",
+  "baked_texture_part2",
+  "gold_matcap_texture",
+  "black_screen_matcap_texture",
+  "rounded_lights_texture",
+] as const;
+
+const meshMaterialsMap: MeshMaterialConfig[] = [
+  { name: "part_1", material: "bake01" },
+  { name: "part_2", material: "bake02" },
+  { name: "glass", material: "glass" },
+  { name: "holoprojector_gold", material: "gold" },
+  { name: "holoprojector_screen", material: "blackScreen" },
+  { name: "red_lights", material: "redLights" },
+  { name: "white_lights", material: "whiteLights" },
+  { name: "rounded_lights", material: "roundedLights" },
+  { name: "hologram_source", material: "hologramLightSource" },
+  { name: "hologram_light", material: "spotLight" },
+  { name: "left_board_screen", material: "radarPattern" },
+  { name: "right_board_screen", material: "orbitalsPattern" },
+  { name: "right_board_screen001", material: "wavePattern" },
+  { name: "right_board_screen002", material: "radarPatternVariant" },
+  { name: "right_board_screen003", material: "targetingPattern" },
+  { name: "corner_board_screen", material: "radarPatternVariant2" },
+  { name: "corner_board_screen001", material: "wavePatternVariant2" },
+  { name: "corner_board_screen002", material: "wavePatternVariant3" },
+] as const;

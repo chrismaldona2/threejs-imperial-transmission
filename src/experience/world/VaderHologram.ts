@@ -3,7 +3,14 @@ import type { GLTF } from "three/examples/jsm/Addons.js";
 import Experience from "../Experience";
 import HologramMaterial from "./HologramMaterial";
 import gsap from "gsap";
-import AudioFader from "../utils/AudioFader";
+import type GUI from "lil-gui";
+
+type VariantName = "highpoly" | "lego" | "funko";
+type Variant = {
+  name: VariantName;
+  mesh: THREE.Mesh;
+  originalScale: THREE.Vector3;
+};
 
 class VaderHologram {
   private readonly experience = Experience.getInstance();
@@ -11,27 +18,26 @@ class VaderHologram {
   private readonly audioRegistry = this.experience.audioRegistry;
   private readonly listener = this.experience.listener;
 
-  private activeMesh: "highpoly" | "lego";
+  private variants!: Variant[];
+  private activeVariantIndex: number = 0;
   private material!: HologramMaterial;
   private breathAudio!: THREE.PositionalAudio;
   private hologramSwitchAudio!: THREE.PositionalAudio;
-  private highPolyMesh!: THREE.Mesh;
-  private legoMesh!: THREE.Mesh;
-
-  private highPolyOriginalScale!: THREE.Vector3;
-  private legoOriginalScale!: THREE.Vector3;
 
   private raycaster: THREE.Raycaster;
   private mousePosition: THREE.Vector2;
   private isAnimating: boolean = false;
 
-  constructor(defaultVariant: "highpoly" | "lego", root: THREE.Object3D) {
-    this.activeMesh = defaultVariant;
+  constructor(defaultVariant: VariantName, root: THREE.Object3D) {
     this.setupMeshes();
+    this.activeVariantIndex = this.variants.findIndex(
+      (item) => item.name === defaultVariant
+    );
+    if (this.activeVariantIndex === -1) this.activeVariantIndex = 0;
     this.setupMaterial();
-    this.setupAudio();
-    root.add(this.highPolyMesh, this.legoMesh);
+    this.variants.forEach((variant) => root.add(variant.mesh));
 
+    this.setupAudio();
     this.raycaster = new THREE.Raycaster();
     this.mousePosition = new THREE.Vector2();
     this.setupMouseInteraction();
@@ -42,15 +48,93 @@ class VaderHologram {
   }
 
   dispose() {
-    this.highPolyMesh.geometry.dispose();
-    this.legoMesh.geometry.dispose();
+    this.variants.forEach((item) => item.mesh.geometry.dispose());
     this.material.dispose();
     this.breathAudio.stop();
     this.breathAudio.disconnect();
     this.hologramSwitchAudio.stop();
     this.hologramSwitchAudio.disconnect();
-    window.removeEventListener("mousemove", this.handleMouseMove);
-    window.removeEventListener("click", this.handleMouseClick);
+  }
+
+  setupTweaks(gui: GUI) {
+    this.material.setupTweaks(gui);
+  }
+
+  private setupMeshes() {
+    const highpolyMesh = this.getMeshFromGLTF("highpoly_vader_model", 0.05);
+    const legoMesh = this.getMeshFromGLTF("lego_vader_model", 0.1);
+    const funkoMesh = this.getMeshFromGLTF("funko_vader_model", 0.1);
+    this.variants = [
+      {
+        name: "highpoly",
+        mesh: highpolyMesh,
+        originalScale: highpolyMesh.scale.clone(),
+      },
+      {
+        name: "lego",
+        mesh: legoMesh,
+        originalScale: legoMesh.scale.clone(),
+      },
+      {
+        name: "funko",
+        mesh: funkoMesh,
+        originalScale: funkoMesh.scale.clone(),
+      },
+    ];
+    this.variants.forEach((variant, index) => {
+      variant.mesh.visible = index === this.activeVariantIndex;
+    });
+  }
+
+  private setupMaterial() {
+    this.material = new HologramMaterial();
+    this.variants.forEach(
+      (variant) => (variant.mesh.material = this.material.material)
+    );
+  }
+
+  private setupAudio() {
+    const { active } = this.getCycleInfo();
+    /* BREATH */
+    const breathAudioBuffer = this.resources.get<AudioBuffer>(
+      "vader_breathing_audio"
+    );
+    this.breathAudio = new THREE.PositionalAudio(this.listener);
+    this.breathAudio.setBuffer(breathAudioBuffer);
+    this.breathAudio.setRefDistance(0.85);
+    this.breathAudio.setLoop(true);
+    this.breathAudio.setVolume(0.7);
+    this.audioRegistry.register("vader_breath", this.breathAudio);
+
+    /* HOLOGRAM SWITCH */
+    const switchAudioBuffer = this.resources.get<AudioBuffer>(
+      "hologram_switch_audio"
+    );
+    this.hologramSwitchAudio = new THREE.PositionalAudio(this.listener);
+    this.hologramSwitchAudio.setBuffer(switchAudioBuffer);
+    this.hologramSwitchAudio.setRefDistance(0.5);
+    this.hologramSwitchAudio.setVolume(0.7);
+    this.audioRegistry.register("hologram_switch", this.hologramSwitchAudio);
+
+    active.mesh.add(this.breathAudio, this.hologramSwitchAudio);
+
+    window.addEventListener("click", this.playAudio);
+    window.addEventListener("touchend", this.playAudio);
+  }
+
+  private playAudio = () => {
+    if (!this.breathAudio.isPlaying) this.breathAudio.play();
+    window.removeEventListener("click", this.playAudio);
+    window.removeEventListener("touchend", this.playAudio);
+  };
+
+  private getMeshFromGLTF(fileName: string, offsetY = 0): THREE.Mesh {
+    const file = this.resources.get<GLTF>(fileName);
+    const obj = file.scene.getObjectByName("darth_vader");
+    if (!(obj instanceof THREE.Mesh))
+      throw new Error(`${fileName} Mesh couldn't be found`);
+    obj.position.y += offsetY;
+    return obj;
   }
 
   private setupMouseInteraction() {
@@ -59,8 +143,8 @@ class VaderHologram {
   }
 
   private handleMouseClick = () => {
-    const { active } = this.getActiveMeshInfo();
-    const intersect = this.raycaster.intersectObject(active);
+    const { active } = this.getCycleInfo();
+    const intersect = this.raycaster.intersectObject(active.mesh);
     if (intersect.length > 0) {
       this.switchVariant();
     }
@@ -76,8 +160,8 @@ class VaderHologram {
       this.experience.camera.instance
     );
 
-    const { active } = this.getActiveMeshInfo();
-    const intersect = this.raycaster.intersectObject(active);
+    const { active } = this.getCycleInfo();
+    const intersect = this.raycaster.intersectObject(active.mesh);
     if (intersect.length > 0) {
       document.body.style.cursor = "pointer";
     } else {
@@ -85,153 +169,72 @@ class VaderHologram {
     }
   };
 
-  private setupMeshes() {
-    this.highPolyMesh = this.getMeshFromGLTF("highpoly_vader_model", 0.05);
-    this.legoMesh = this.getMeshFromGLTF("lego_vader_model", 0.1);
-    this.highPolyOriginalScale = this.highPolyMesh.scale.clone();
-    this.legoOriginalScale = this.legoMesh.scale.clone();
-    if (this.activeMesh === "highpoly") {
-      this.highPolyMesh.visible = true;
-      this.legoMesh.visible = false;
-    } else {
-      this.highPolyMesh.visible = false;
-      this.legoMesh.visible = true;
-    }
-  }
-
-  private setupMaterial() {
-    this.material = new HologramMaterial();
-    this.highPolyMesh.material = this.material.material;
-    this.legoMesh.material = this.material.material;
-  }
-
-  private setupAudio() {
-    const { active } = this.getActiveMeshInfo();
-
-    /* BREATH */
-    const breathAudioBuffer = this.resources.get<AudioBuffer>(
-      "vader_breathing_audio"
-    );
-    this.breathAudio = new THREE.PositionalAudio(this.listener);
-    this.breathAudio.setBuffer(breathAudioBuffer);
-    this.breathAudio.setRefDistance(0.85);
-    this.breathAudio.setLoop(true);
-    this.breathAudio.setVolume(0.66);
-    this.audioRegistry.register("vader_breath", this.breathAudio);
-
-    /* HOLOGRAM SWITCH */
-    const switchAudioBuffer = this.resources.get<AudioBuffer>(
-      "hologram_switch_audio"
-    );
-    this.hologramSwitchAudio = new THREE.PositionalAudio(this.listener);
-    this.hologramSwitchAudio.setBuffer(switchAudioBuffer);
-    this.hologramSwitchAudio.setRefDistance(0.5);
-    this.hologramSwitchAudio.setVolume(0.7);
-    this.audioRegistry.register("hologram_switch", this.hologramSwitchAudio);
-    window.addEventListener("click", this.playBreathAudio);
-
-    active.add(this.breathAudio, this.hologramSwitchAudio);
-  }
-
-  private playBreathAudio = () => {
-    AudioFader.fadeIn(this.breathAudio, this.breathAudio.getVolume());
-    window.removeEventListener("click", this.playBreathAudio);
-  };
-
-  private getMeshFromGLTF(fileName: string, offsetY = 0): THREE.Mesh {
-    const file = this.resources.get<GLTF>(fileName);
-    const obj = file.scene.getObjectByName("darth_vader");
-    if (!(obj instanceof THREE.Mesh))
-      throw new Error(`${fileName} Mesh couldn't be found`);
-    obj.position.y += offsetY;
-    return obj;
-  }
-
-  private getActiveMeshInfo(): {
-    active: THREE.Mesh;
-    other: THREE.Mesh;
-    activeOriginalScale: THREE.Vector3;
-    otherOriginalScale: THREE.Vector3;
+  private getCycleInfo(): {
+    active: Variant;
+    next: Variant;
+    nextIndex: number;
   } {
-    const isHighpoly = this.activeMesh === "highpoly";
+    const active = this.variants[this.activeVariantIndex];
+    const nextIndex = (this.activeVariantIndex + 1) % this.variants.length;
+    const next = this.variants[nextIndex];
+    if (!active || !next) throw new Error("Variants not properly initialized");
+
     return {
-      active: isHighpoly ? this.highPolyMesh : this.legoMesh,
-      other: isHighpoly ? this.legoMesh : this.highPolyMesh,
-      activeOriginalScale: isHighpoly
-        ? this.highPolyOriginalScale
-        : this.legoOriginalScale,
-      otherOriginalScale: isHighpoly
-        ? this.legoOriginalScale
-        : this.highPolyOriginalScale,
+      active,
+      next,
+      nextIndex,
     };
   }
 
   private switchVariant() {
-    if (this.isAnimating) return;
+    if (this.isAnimating || this.hologramSwitchAudio.isPlaying) return;
     this.isAnimating = true;
     this.hologramSwitchAudio.play();
 
-    const { active, other, activeOriginalScale, otherOriginalScale } =
-      this.getActiveMeshInfo();
-    const activeMeshHalfScale = activeOriginalScale.clone().multiplyScalar(0.5);
+    const { active, next, nextIndex } = this.getCycleInfo();
+    const activeToScale = active.originalScale.clone().multiplyScalar(0.5);
+    const nextFromScale = new THREE.Vector3(0, 0, 0);
 
-    /* ANIMATION */
-    const tl = gsap.timeline({
+    const timeline = gsap.timeline({
       onComplete: () => {
+        this.breathAudio.parent?.remove(this.breathAudio);
+        this.hologramSwitchAudio.parent?.remove(this.hologramSwitchAudio);
+        next.mesh.add(this.breathAudio, this.hologramSwitchAudio);
+        this.activeVariantIndex = nextIndex;
         this.isAnimating = false;
-        this.activeMesh = this.activeMesh === "highpoly" ? "lego" : "highpoly";
       },
     });
 
-    tl.to(
+    timeline.to(
       this.material.material.uniforms.uOpacity,
-      {
-        value: 0,
-        duration: 0.5,
-        ease: "power2.inOut",
-      },
+      { value: 0, duration: 0.5, ease: "power2.inOut" },
       0
     );
 
-    tl.to(
-      active.scale,
+    timeline.to(
+      active.mesh.scale,
       {
-        x: activeMeshHalfScale.x,
-        y: activeMeshHalfScale.y,
-        z: activeMeshHalfScale.z,
+        ...activeToScale,
         duration: 0.5,
         ease: "power2.inOut",
         onComplete: () => {
-          /* SWITCH LOGIC ↓ */
-          // Didn't implement disposing on switch as performance was good, disposing would probably complicate things.
-          active.visible = false;
-          other.visible = true;
-          other.scale.set(0, 0, 0);
-          other.add(this.breathAudio, this.hologramSwitchAudio);
+          active.mesh.visible = false;
+          next.mesh.visible = true;
+          next.mesh.scale.copy(nextFromScale);
         },
       },
       0
     );
 
-    tl.to(
+    timeline.to(
       this.material.material.uniforms.uOpacity,
-      {
-        value: 1,
-        duration: 0.5,
-        ease: "power2.inOut",
-      },
+      { value: 1, duration: 0.5, ease: "power2.inOut" },
       0.5
     );
 
-    tl.to(
-      other.scale,
-      {
-        x: otherOriginalScale.x,
-        y: otherOriginalScale.y,
-        z: otherOriginalScale.z,
-        duration: 0.5,
-        ease: "power2.inOut",
-      },
+    timeline.to(
+      next.mesh.scale,
+      { ...next.originalScale, duration: 0.5, ease: "power2.inOut" },
       0.5
     );
   }

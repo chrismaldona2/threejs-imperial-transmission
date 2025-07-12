@@ -4,14 +4,15 @@ import { OrbitControls } from "three/examples/jsm/Addons.js";
 
 class Camera {
   private readonly experience = Experience.getInstance();
-  private readonly gui = this.experience.debug.instance;
   private readonly sizes = this.experience.sizes;
   private readonly scene = this.experience.scene;
   private readonly canvas = this.experience.canvas.domElement;
 
   readonly instance: THREE.PerspectiveCamera;
   readonly controls: OrbitControls;
-  private tweaks?: typeof this.gui;
+
+  private minBoundaries: THREE.Vector3;
+  private maxBoundaries: THREE.Vector3;
 
   constructor() {
     this.instance = new THREE.PerspectiveCamera(
@@ -24,14 +25,17 @@ class Camera {
 
     this.controls = new OrbitControls(this.instance, this.canvas);
     this.controls.enableDamping = true;
-    this.controls.enablePan = false;
-    this.controls.minDistance = 2;
-    this.controls.maxDistance = 4.5;
+    this.controls.dampingFactor = 0.04;
+    this.controls.panSpeed = 0.9;
+    this.controls.minDistance = 1.5;
+    this.controls.minZoom = 1.5;
     this.controls.target.set(-0.8, 0.25, -2.38);
 
-    /* MOUNT */
+    this.minBoundaries = new THREE.Vector3(-2.85, -0.65, -4.6);
+    this.maxBoundaries = new THREE.Vector3(2.33, 2.45, 2.75);
+    this.controls.addEventListener("change", this.handleBoundaries);
+
     this.scene.add(this.instance);
-    this.setupTweaks();
   }
 
   update() {
@@ -43,32 +47,17 @@ class Camera {
     this.instance.updateProjectionMatrix();
   }
 
-  setupTweaks() {
-    this.tweaks = this.gui.addFolder("Camera");
-    this.tweaks
-      .add(this.instance.position, "x")
-      .min(-5)
-      .max(5)
-      .step(0.01)
-      .name("Position X");
-    this.tweaks
-      .add(this.instance.position, "y")
-      .min(-5)
-      .max(5)
-      .step(0.01)
-      .name("Position Y");
-    this.tweaks
-      .add(this.instance.position, "z")
-      .min(-5)
-      .max(5)
-      .step(0.01)
-      .name("Position Z");
+  dispose() {
+    this.controls.removeEventListener("change", this.handleBoundaries);
+    this.controls.dispose();
   }
 
-  dispose() {
-    this.controls.dispose();
-    this.tweaks?.destroy();
-  }
+  private handleBoundaries = () => {
+    const allowedPosition = this.instance.position
+      .clone()
+      .clamp(this.minBoundaries, this.maxBoundaries);
+    this.instance.position.lerp(allowedPosition, 0.25);
+  };
 }
 
 export default Camera;

@@ -23,17 +23,41 @@ type LoadersRecord = Record<Source["type"], SupportedLoaders>;
 
 class Resources extends EventEmitter {
   private readonly sources = sources;
-
   private toLoad = sources.length;
   private loaded = 0;
   private loaders: LoadersRecord;
   private items: Record<Source["name"], SupportedFiles>;
+  private webPSupported: boolean | null = null;
+  progress: number;
 
   constructor() {
     super();
     this.items = {};
     this.loaders = this.initLoaders();
-    this.load();
+    this.progress = 0;
+    this.startLoading();
+  }
+
+  private async startLoading() {
+    try {
+      this.webPSupported = await this.detectWebPSupport();
+      this.loadSources();
+    } catch (error) {
+      console.error("WebP detection failed:", error);
+      this.webPSupported = false;
+      this.loadSources();
+    }
+  }
+
+  private async detectWebPSupport(): Promise<boolean> {
+    return new Promise((resolve) => {
+      const webP = new Image();
+      webP.onload = webP.onerror = () => {
+        resolve(webP.height === 2);
+      };
+      webP.src =
+        "data:image/webp;base64,UklGRhoAAABXRUJQVlA4TA4AAAAvQUxQSAFAAAABcCQAAAABAAgAASgAAAIAAAC+AAA/AAAAAA==";
+    });
   }
 
   private initLoaders(): LoadersRecord {
@@ -50,7 +74,7 @@ class Resources extends EventEmitter {
     };
   }
 
-  private load() {
+  private loadSources() {
     this.sources.forEach((src) => {
       switch (src.type) {
         case "gltf": {
@@ -66,8 +90,12 @@ class Resources extends EventEmitter {
 
         case "texture": {
           const texLoader = this.loaders.texture as TextureLoader;
+          const path = this.webPSupported
+            ? src.path
+            : src.fallbackPath || src.path;
+
           texLoader.load(
-            src.path,
+            path,
             (tex) => this.handleLoadSuccess(src.name, tex),
             undefined,
             (error) => this.handleLoadError(src.name, error)
@@ -77,9 +105,12 @@ class Resources extends EventEmitter {
 
         case "cubemap": {
           const cubeLoader = this.loaders.cubemap as CubeTextureLoader;
+          const paths = this.webPSupported
+            ? src.paths
+            : src.fallbackPaths || src.paths;
 
           cubeLoader.load(
-            src.path,
+            paths,
             (cubeTex) => this.handleLoadSuccess(src.name, cubeTex),
             undefined,
             (error) => this.handleLoadError(src.name, error)
@@ -119,6 +150,7 @@ class Resources extends EventEmitter {
 
   private handleFileLoad() {
     this.loaded++;
+    this.progress = this.loaded / this.toLoad;
     this.trigger("fileLoaded");
     if (this.toLoad === this.loaded) this.trigger("loadEnd");
   }

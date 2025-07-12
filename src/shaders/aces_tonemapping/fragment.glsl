@@ -1,5 +1,5 @@
 uniform sampler2D tDiffuse;
-uniform float exposure;
+uniform float uExposure;
 varying vec2 vUv;
 
 #include ../partials/color_conversion.glsl
@@ -23,7 +23,7 @@ vec3 ACESFilmicToneMapping(vec3 color) {
     vec3(-0.07367, -0.00605, 1.07602)
   );
 
-  color *= exposure / 0.6;
+  color *= uExposure / 0.6;
   color = ACESInputMat * color;
   color = RRTAndODTFit(color);
   color = ACESOutputMat * color;

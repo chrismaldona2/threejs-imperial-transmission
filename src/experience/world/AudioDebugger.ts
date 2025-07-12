@@ -2,7 +2,6 @@ import type GUI from "lil-gui";
 import Experience from "../Experience";
 import type { SupportedAudio } from "../utils/AudioRegistry";
 import { PositionalAudio } from "three";
-import AudioFader from "../utils/AudioFader";
 
 class SoundDebugger {
   private readonly experience = Experience.getInstance();
@@ -48,11 +47,7 @@ class SoundDebugger {
       .onChange(() => {
         this.backgroundMusic.stop();
         this.backgroundMusic.setBuffer(buffers[controls.active]);
-        AudioFader.fadeIn(
-          this.backgroundMusic,
-          this.backgroundMusic.getVolume(),
-          3
-        );
+        this.backgroundMusic.play();
       });
     this.setupGeneralAudioTweaks(this.backgroundMusic, folder);
   }

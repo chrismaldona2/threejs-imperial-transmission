@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import Experience from "./Experience";
+import type GUI from "lil-gui";
 
 class Renderer {
   private readonly experience = Experience.getInstance();
@@ -10,7 +11,7 @@ class Renderer {
   private readonly debug = this.experience.debug.instance;
 
   readonly instance: THREE.WebGLRenderer;
-  private tweaks?: typeof this.debug;
+  private tweaks?: GUI;
 
   constructor() {
     this.instance = new THREE.WebGLRenderer({
