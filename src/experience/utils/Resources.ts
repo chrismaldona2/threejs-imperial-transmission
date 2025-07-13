@@ -38,28 +38,6 @@ class Resources extends EventEmitter {
     this.startLoading();
   }
 
-  private async startLoading() {
-    try {
-      this.webPSupported = await this.detectWebPSupport();
-      this.loadSources();
-    } catch (error) {
-      console.error("WebP detection failed:", error);
-      this.webPSupported = false;
-      this.loadSources();
-    }
-  }
-
-  private async detectWebPSupport(): Promise<boolean> {
-    return new Promise((resolve) => {
-      const webP = new Image();
-      webP.onload = webP.onerror = () => {
-        resolve(webP.height === 2);
-      };
-      webP.src =
-        "data:image/webp;base64,UklGRhoAAABXRUJQVlA4TA4AAAAvQUxQSAFAAAABcCQAAAABAAgAASgAAAIAAAC+AAA/AAAAAA==";
-    });
-  }
-
   private initLoaders(): LoadersRecord {
     const dracoLoader = new DRACOLoader();
     dracoLoader.setDecoderPath("/draco/");
@@ -72,6 +50,31 @@ class Resources extends EventEmitter {
       cubemap: new CubeTextureLoader(),
       audio: new AudioLoader(),
     };
+  }
+
+  private async detectWebPSupport(): Promise<boolean> {
+    return new Promise((resolve) => {
+      const webP = new Image();
+      webP.onload = () => {
+        resolve(webP.width > 0 && webP.height > 0);
+      };
+      webP.onerror = () => {
+        resolve(false);
+      };
+      webP.src =
+        "data:image/webp;base64,UklGRiIAAABXRUJQVlA4IBYAAAAwAQCdASoBAAEADsD+JaQAA3AAAAAA";
+    });
+  }
+
+  private async startLoading() {
+    try {
+      this.webPSupported = await this.detectWebPSupport();
+      this.loadSources();
+    } catch (error) {
+      console.error("WebP detection failed:", error);
+      this.webPSupported = false;
+      this.loadSources();
+    }
   }
 
   private loadSources() {
