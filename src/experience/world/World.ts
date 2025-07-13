@@ -1,7 +1,7 @@
 import Experience from "../Experience";
-import Environment from "./Environment";
-import Ship from "./Ship";
-import AudioDebugger from "./AudioDebugger";
+import Environment from "./systems/Environment";
+import Ship from "./objects/Ship";
+import AudioDebugger from "./systems/AudioDebugger";
 
 class World {
   private readonly experience = Experience.getInstance();

@@ -1,6 +1,6 @@
 import type GUI from "lil-gui";
-import Experience from "../Experience";
-import type { SupportedAudio } from "../utils/AudioRegistry";
+import Experience from "../../Experience";
+import type { SupportedAudio } from "../../utils/AudioRegistry";
 import { PositionalAudio } from "three";
 
 class SoundDebugger {

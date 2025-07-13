@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import type { GLTF } from "three/examples/jsm/Addons.js";
-import Experience from "../Experience";
-import HologramMaterial from "./HologramMaterial";
+import Experience from "../../Experience";
+import HologramMaterial from "../materials/HologramMaterial";
 import gsap from "gsap";
 import type GUI from "lil-gui";
 

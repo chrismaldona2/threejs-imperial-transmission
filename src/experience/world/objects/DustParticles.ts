@@ -1,7 +1,7 @@
 import * as THREE from "three";
-import vertexShader from "../../shaders/dust_particles/vertex.glsl";
-import fragmentShader from "../../shaders/dust_particles/fragment.glsl";
-import Experience from "../Experience";
+import vertexShader from "../../../shaders/dust_particles/vertex.glsl";
+import fragmentShader from "../../../shaders/dust_particles/fragment.glsl";
+import Experience from "../../Experience";
 import type GUI from "lil-gui";
 
 class DustParticles {
@@ -88,7 +88,7 @@ class DustParticles {
         uniforms.uColor.value.set(controls.color);
       });
     gui
-      .add(this.config, "amount", 10, 2500, 1)
+      .add(this.config, "amount", 10, 8000, 1)
       .name("Particles Amount")
       .onFinishChange(() => {
         this.geometry.dispose();
@@ -120,14 +120,14 @@ interface DustParticlesOptions {
 }
 
 const defaultConfig: DustParticlesOptions = {
-  amount: 1000,
+  amount: 285,
   color: new THREE.Color(0x3e4046),
-  opacity: 0.5,
+  opacity: 0.25,
   boundaries: {
     min: new THREE.Vector3(-3, -1, -5),
     max: new THREE.Vector3(2.5, 2.5, 3),
   },
-  size: 4.5,
+  size: 10,
   movementFrequency: 10,
-  movementAmplitude: 0.01,
+  movementAmplitude: 0.015,
 };

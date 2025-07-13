@@ -10,6 +10,7 @@ import Debug from "./utils/Debug";
 import PostProccessing from "./PostProccessing";
 import AudioRegistry from "./utils/AudioRegistry";
 import LoadingScreen from "./LoadingScreen";
+import FullscreenHandler from "./utils/FullscreenHandler";
 
 class Experience {
   private static instance: Experience;
@@ -26,6 +27,7 @@ class Experience {
   postprocessing: PostProccessing;
   world: World;
   audioRegistry: AudioRegistry;
+  fullscreenHandler: FullscreenHandler;
 
   private constructor() {
     Experience.instance = this;
@@ -44,6 +46,7 @@ class Experience {
     this.postprocessing = new PostProccessing();
     this.world = new World();
     this.audioRegistry = new AudioRegistry();
+    this.fullscreenHandler = new FullscreenHandler(this.canvas.domElement);
 
     this.timer.on("tick", () => this.update());
     this.sizes.on("resize", () => this.resize());
@@ -68,6 +71,7 @@ class Experience {
     this.canvas.destroy();
     this.camera.dispose();
     this.renderer.dispose();
+    this.fullscreenHandler.dispose();
     this.debug.dispose();
   }
 

@@ -1,7 +1,7 @@
 import * as THREE from "three";
-import vertexShader from "../../shaders/hologram/vertex.glsl";
-import fragmentShader from "../../shaders/hologram/fragment.glsl";
-import Experience from "../Experience";
+import vertexShader from "../../../shaders/hologram/vertex.glsl";
+import fragmentShader from "../../../shaders/hologram/fragment.glsl";
+import Experience from "../../Experience";
 import type GUI from "lil-gui";
 
 interface HologramMaterialOptions {

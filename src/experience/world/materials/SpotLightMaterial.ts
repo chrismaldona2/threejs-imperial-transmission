@@ -1,7 +1,7 @@
-import Experience from "../Experience";
+import Experience from "../../Experience";
 import * as THREE from "three";
-import vertexShader from "../../shaders/lightspot/vertex.glsl";
-import fragmentShader from "../../shaders/lightspot/fragment.glsl";
+import vertexShader from "../../../shaders/lightspot/vertex.glsl";
+import fragmentShader from "../../../shaders/lightspot/fragment.glsl";
 import type GUI from "lil-gui";
 
 class SpotLightMaterial {

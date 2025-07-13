@@ -22,7 +22,7 @@ class GlassMaterial {
 
   setupTweaks(debugFolder: GUI) {
     const controls = {
-      color: this.material.specular.getHex(),
+      color: this.material.color.getHex(),
     };
 
     debugFolder

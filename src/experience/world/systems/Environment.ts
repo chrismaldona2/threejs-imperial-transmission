@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import Experience from "../Experience";
+import Experience from "../../Experience";
 import type GUI from "lil-gui";
 
 class Environment {

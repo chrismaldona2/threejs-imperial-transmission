@@ -1,9 +1,9 @@
 import * as THREE from "three";
-import Experience from "../Experience";
+import Experience from "../../Experience";
 import type { GLTF } from "three/examples/jsm/Addons.js";
-import ScreenPatternMaterial from "./ScreenPatternMaterial";
-import SpotLightMaterial from "./SpotLightMaterial";
-import GlassMaterial from "./GlassMaterial";
+import ScreenPatternMaterial from "../materials/ScreenPatternMaterial";
+import SpotLightMaterial from "../materials/SpotLightMaterial";
+import GlassMaterial from "../materials/GlassMaterial";
 import VaderHologram from "./VaderHologram";
 import type GUI from "lil-gui";
 import DustParticles from "./DustParticles";
@@ -87,7 +87,6 @@ class Ship {
   private createMaterials() {
     /* CUSTOM MATERIALS INITIALIZATION  */
     this.spotLightMaterial = new SpotLightMaterial();
-
     this.glassMaterial = new GlassMaterial();
     this.screenPatternsMaterials = {
       left: new ScreenPatternMaterial({
