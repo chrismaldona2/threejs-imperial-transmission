@@ -1,3 +1,8 @@
+:root {
+  --hilt-width: 20%;
+  --lightsaber-height: 38%;
+}
+
 *,
 *::after,
 *::before {
@@ -52,18 +57,23 @@ body {
 }
 
 .saber_hilt {
-  height: 100%;
-  width: fit-content;
+  width: var(--hilt-width);
   z-index: 10;
 }
 
 .saber_light {
   position: absolute;
-  height: 40%;
-  width: 0;
+  height: var(--lightsaber-height);
+  left: var(--hilt-width);
+  width: calc(100% - var(--hilt-width));
+  will-change: transform;
+  transform: scaleX(0);
+  transform-origin: left center;
+
   background-color: #fa2637;
   border-top-right-radius: 1rem;
   border-bottom-right-radius: 1rem;
+  box-shadow: 0 0 6px #fa2637, 0 0 12px #fa2637, 0 0 20px #ff4455;
 }
 
 .lil-gui {

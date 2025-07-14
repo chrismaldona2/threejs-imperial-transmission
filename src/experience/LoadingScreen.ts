@@ -23,9 +23,10 @@ class LoadingScreen {
   }
 
   update() {
-    const progress = Math.round(this.resources.progress * 100);
+    const progress = Math.round(this.resources.progress);
     gsap.to(this.saberLight, {
-      width: `${progress}%`,
+      scaleX: progress,
+      transformOrigin: "left center",
       duration: 0.25,
       ease: "power2.out",
     });
