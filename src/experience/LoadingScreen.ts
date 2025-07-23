@@ -6,6 +6,7 @@ const classNames = {
   saberContainer: "saber_container",
   saberHilt: "saber_hilt",
   saberLight: "saber_light",
+  text: "loading_screen_text",
 } as const;
 
 class LoadingScreen {
@@ -15,10 +16,12 @@ class LoadingScreen {
   private saberContainer!: HTMLDivElement;
   private saberHilt!: SVGElement;
   private saberLight!: HTMLDivElement;
+  private disclaimer!: HTMLParagraphElement;
 
   constructor() {
     this.setupContainer();
     this.setupSaber();
+    this.setupDisclaimer();
     this.addListeners();
   }
 
@@ -62,6 +65,14 @@ class LoadingScreen {
     this.saberLight.classList.add(classNames.saberLight);
     this.saberContainer.append(this.saberHilt, this.saberLight);
     this.container.appendChild(this.saberContainer);
+  }
+
+  private setupDisclaimer() {
+    this.disclaimer = document.createElement("p");
+    this.disclaimer.classList.add(classNames.text);
+    this.disclaimer.innerText =
+      "Non-commercial educational project. Not affiliated with any IP.";
+    this.container.appendChild(this.disclaimer);
   }
 
   private getHiltSvg(): SVGElement {
